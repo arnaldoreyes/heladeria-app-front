@@ -1,0 +1,71 @@
+{
+  "auth": {
+    "title": "Inicia sesión en tu cuenta",
+    "subtitle": "Las credenciales de prueba están rellenadas, solo haz clic en iniciar sesión.",
+    "fields": {
+      "email": "Correo electrónico",
+      "password": "Contraseña"
+    },
+    "button": {
+      "signIn": "Iniciar sesión"
+    },
+    "newBusiness": "¿Nuevo negocio?",
+    "createAccount": "Crear una cuenta",
+    "brand": {
+      "heading": "Motor de Punto de Venta e Inventario",
+      "description": "Punto de venta multinicho, control de inventario, presupuestos y analíticas financieras — diseñado para economías multimoneda."
+    },
+    "errors": {
+      "emailRequired": "El correo es requerido",
+      "invalidEmail": "Ingresa un correo electrónico válido",
+      "passwordMinLength": "La contraseña debe tener al menos 6 caracteres"
+    },
+    "toast": {
+      "welcomeBack": "¡Bienvenido de nuevo!",
+      "invalidCredentials": "Credenciales inválidas. Inténtalo de nuevo.",
+      "loggedOut": "Has cerrado sesión correctamente",
+      "logoutError": "Ocurrió un problema al cerrar sesión, pero fuiste redirigido"
+    },
+    "register": {
+      "title": "Registra tu negocio",
+      "subtitle": "Configura tu punto de venta en menos de un minuto.",
+      "businessName": "Nombre del negocio",
+      "ownerName": "Tu nombre",
+      "email": "Correo electrónico",
+      "password": "Contraseña",
+      "nicho": "Nicho / Categoría",
+      "baseCurrency": "Moneda base",
+      "distributionRulesTitle": "Reglas de distribución por defecto",
+      "distributionRulesSubtitle": "¿Cómo se deben dividir los ingresos de las ventas?",
+      "businessFund": "Fondo del negocio",
+      "personalProfit": "Ganancia personal",
+      "submitButton": "Crear negocio",
+      "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+      "signInLink": "Iniciar sesión",
+      "toastSuccess": "¡Negocio creado exitosamente!",
+      "toastError": "No se pudo registrar el negocio. Inténtalo de nuevo.",
+      "nichos": {
+        "Cold": "Frío / Hielería",
+        "Beverages": "Bebidas",
+        "Food": "Comida / Restaurante",
+        "Groceries": "Víveres / Abasto",
+        "Pharmacy": "Farmacia",
+        "Other": "Otro"
+      }
+    }
+  
+  },
+  "common": {
+      "reload": "Recargar",
+      "goHome": "Ir al inicio",
+      "backToHome": "Volver al Inicio",
+      "pleaseWait": "Por favor espera..."
+    },
+    "errors": {
+      "oops": "¡Ups!",
+      "unexpected": "Ha ocurrido un error inesperado en la aplicación.",
+      "somethingWentWrong": "Algo salió mal",
+      "notFoundTitle": "Página no encontrada",
+      "notFoundDescription": "Lo sentimos, la página que estás buscando no existe o fue movida a otra dirección."
+    }
+}
