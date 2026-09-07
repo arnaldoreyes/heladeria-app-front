@@ -13,23 +13,21 @@ export type StockLevel = 'high' | 'low' | 'out';
 export interface Business {
   id: string;
   name: string;
-  nicho: string;
-  baseCurrency: Currency;
-  ownerName: string;
-  ownerEmail: string;
-  active: boolean;
-  totalSalesVolumeUsd: number;
-  createdAt: string;
+  niche: string;
+  slug: string;
+  status: 'active' | 'inactive';
+  settings: BuisinessSettings;
 }
 
-export interface User {
+export interface BuisinessSettings {
   id: string;
-  name: string;
-  email: string;
-  role: RoleName;
-  businessId: string | null;
-  active: boolean;
-}
+  bcv_mode: boolean;
+  default_profit_percentage: number;
+  default_reinvestment_percentage: number;
+  print_ticket_on_sale: boolean;
+  ticket_header_notes: string;
+  ticket_footer_notes: string;
+}   
 
 export interface Role {
   id: string;

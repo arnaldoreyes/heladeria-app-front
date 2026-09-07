@@ -1,58 +1,26 @@
+// src/App.tsx
 import { RouterProvider } from "react-router";
-import { type PropsWithChildren } from 'react';
-
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-} from '@tanstack/react-query';
-
-import { router } from "./router/routes";
-import './index.css'
-import './i18n' 
-
+import { QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 
-import { CustomFullScreenLoading } from "./components/custom/CustomFullScreenLoading";
-import { checkAuthAction } from "./pages/auth/actions/check-auth.action";
-import { useAuthStore } from "./stores/auth-store";
+import { router } from "./router/routes";
+import { queryClient } from "./lib/query-client";
+import { CheckAuthProvider } from "./providers/CheckAuthProvider";
+import { useThemeStore } from "./stores/theme-store";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-    },
-  },
-});
+import './index.css';
+import './i18n';
 
-const CheckAuthProvider = ({ children }: PropsWithChildren) => {
-  const { authStatus } = useAuthStore();
-
-  const { isLoading } = useQuery({
-    queryKey: ['auth', 'check-status'],
-    queryFn: checkAuthAction,
-    retry: false,
-    refetchOnWindowFocus: false,
-    refetchInterval: authStatus === 'authenticated' ? 1000 * 60 * 1.5 : false,
-  });
-
-  if (isLoading || authStatus === 'checking') {
-    return <CustomFullScreenLoading />;
-  }
-
-  return children;
-};
+// Inicializar tema al cargar la app
+useThemeStore.getState().setTheme(useThemeStore.getState().theme);
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Toaster />
-
-      <CheckAuthProvider>
-        <RouterProvider router={router} />
-      </CheckAuthProvider>
-
+        <Toaster />
+        <CheckAuthProvider>
+          <RouterProvider router={router} />
+        </CheckAuthProvider>
     </QueryClientProvider>
-  )
+  );
 }
