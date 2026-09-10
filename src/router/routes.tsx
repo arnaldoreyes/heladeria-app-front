@@ -14,6 +14,7 @@ import SettingsLayout from '@/pages/settings/SettingsLayout';
 import BusinessSettings from '@/pages/settings/BusinessSettings';
 import PaymentMethodsConfig from '@/pages/settings/PaymentMethodsConfig';
 import ExchangeRatesConfig from '@/pages/settings/ExchangeRatesConfig';
+import InventoryLayout from '@/pages/inventory/InventoryLayout';
 
 // AdminPages
 
@@ -62,10 +63,18 @@ export const router = createBrowserRouter([
       { path: 'customers/:id/edit', Component: /* CustomerForm */ () => <div>Editar Cliente</div> },
 
       // Catálogo (Productos y Categorías)
-      { path: 'products', Component: /* ProductsList */ () => <div>Productos</div> },
-      { path: 'products/new', Component: /* ProductForm */ () => <div>Nuevo Producto</div> },
-      { path: 'products/:id/edit', Component: /* ProductForm */ () => <div>Editar Producto</div> },
-      
+      { 
+        path: 'inventory', 
+        Component: InventoryLayout, 
+        children: [
+          { index: true, element: <Navigate to="products" replace /> },
+          { path: 'products', Component: /* ProductsList */ () => <div>Productos</div> },      
+          { path: 'categories', Component: /* CategoriesList */ () => <div>Categorías</div> },         
+          { path: 'restocks', Component: /* RestocksList */ () => <div>Compras/Reabastecimiento</div> },
+          { path: 'history', Component: /* InventoryMovements */ () => <div>Movimientos</div> },
+        ]
+      },
+      { path: 'products', Component: /* ProductsList */ () => <div>Productos</div> },      
       { path: 'categories', Component: /* CategoriesList */ () => <div>Categorías</div> },
 
       // Inventario y Abastecimiento

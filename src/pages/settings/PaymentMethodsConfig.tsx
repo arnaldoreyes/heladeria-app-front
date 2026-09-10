@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
-import { Download, Trash2, CheckCircle, XCircle, Plus } from 'lucide-react';
+import { Trash2, CheckCircle, XCircle, Plus } from 'lucide-react';
 
 import { DataTable } from '@/components/ui/data-table/DataTable';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -10,6 +10,7 @@ import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 
 import { usePaymentMethods } from './hooks/usePaymentMethods';
 import { usePaymentMethodsColumns } from './hooks/usePaymentMethodsColumns';
+import { PaymentMethodGridCard } from './components/PaymentMethodGridCard';
 
 export default function PaymentMethodsConfig() {
   const { t } = useTranslation(['settings', 'common']);
@@ -50,6 +51,7 @@ export default function PaymentMethodsConfig() {
     currency: currencyFilter !== 'ALL' ? currencyFilter : undefined
   });
 
+  // Pasamos los callbacks reales del hook a las columnas
   const columns = usePaymentMethodsColumns({
     onEdit: openModal,
     onDelete: (id) => setDeletingId(id), 
@@ -105,17 +107,20 @@ export default function PaymentMethodsConfig() {
             onClick: (selectedRows) => handleBulkStatus(getRealIds(selectedRows), false),
           },
           {
-            label: t('settings.payments.bulk_export', 'Exportar CSV'),
-            icon: <Download className="h-4 w-4" />,
-            onClick: (selectedRows) => console.log('Exportar', getRealIds(selectedRows)),
-          },
-          {
             label: t('settings.payments.bulk_delete', 'Eliminar Masivo'),
             icon: <Trash2 className="h-4 w-4" />,
             variant: 'destructive', 
             onClick: (selectedRows) => setBulkDeleteIds(getRealIds(selectedRows)),
           },
         ]}
+        defaultViewMode="grid"
+        renderGridCard={(row) => (
+          <PaymentMethodGridCard
+            row={row}
+            onEdit={openModal}
+            onDelete={(id) => setDeletingId(id)}
+          />
+        )}
       />
 
       {/* --- MODAL CREAR / EDITAR --- */}

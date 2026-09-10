@@ -64,6 +64,8 @@
     "edit": "Editar",
     "delete": "Eliminar",
     "all": "Todas",
+    "filters": "Filtros",
+    "selected":"Seleccionado(s)",
     "select": "Seleccionar",
     "select_placeholder": "Seleccione un tipo...",
     "email": "Correo electrónico",

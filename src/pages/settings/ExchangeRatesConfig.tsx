@@ -29,13 +29,13 @@ export default function ExchangeRatesConfig() {
   const getSourceBadge = (source?: string) => {
     switch (source) {
       case 'system_cron':
-        return <Badge variant="secondary"><Bot className="w-3 h-3 mr-1" /> {t('settings.exchange.sourceCron', 'Automático')}</Badge>;
+        return <Badge variant="secondary"><Bot className="w-3 h-3 mr-1 shrink-0" /> {t('settings.exchange.sourceCron', 'Automático')}</Badge>;
       case 'system_sync':
-        return <Badge variant="outline"><RefreshCw className="w-3 h-3 mr-1" /> {t('settings.exchange.sourceSync', 'Sync')}</Badge>;
+        return <Badge variant="outline"><RefreshCw className="w-3 h-3 mr-1 shrink-0" /> {t('settings.exchange.sourceSync', 'Sync')}</Badge>;
       case 'manual':
-        return <Badge variant="default"><Wrench className="w-3 h-3 mr-1" /> {t('settings.exchange.sourceManual', 'Manual')}</Badge>;
+        return <Badge variant="default"><Wrench className="w-3 h-3 mr-1 shrink-0" /> {t('settings.exchange.sourceManual', 'Manual')}</Badge>;
       default:
-        return <Badge variant="outline"><Bot className="w-3 h-3 mr-1" /> {t('settings.exchange.sourceApi', 'API / BCV')}</Badge>;
+        return <Badge variant="outline"><Bot className="w-3 h-3 mr-1 shrink-0" /> {t('settings.exchange.sourceApi', 'API / BCV')}</Badge>;
     }
   };
 
@@ -53,7 +53,7 @@ export default function ExchangeRatesConfig() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full overflow-x-hidden">
       <div>
         <h3 className="text-lg font-medium">{t('settings.exchange.title', 'Tasas de Cambio')}</h3>
         <p className="text-sm text-muted-foreground">
@@ -65,7 +65,7 @@ export default function ExchangeRatesConfig() {
       <Card className="bg-primary/5 border-primary/20">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
-            <DollarSign className="h-5 w-5 text-primary" />
+            <DollarSign className="h-5 w-5 text-primary shrink-0" />
             {t('settings.exchange.currentTitle', 'Tasa Activa en el Sistema')}
           </CardTitle>
           <CardDescription>
@@ -76,8 +76,8 @@ export default function ExchangeRatesConfig() {
         </CardHeader>
         <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className="text-4xl font-extrabold text-primary tracking-tight">
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="text-3xl sm:text-4xl font-extrabold text-primary tracking-tight">
                 {currentRate ? `Bs. ${Number(currentRate.rate).toFixed(2)}` : 'N/A'}
               </div>
               {currentRate?.currency && (
@@ -88,11 +88,11 @@ export default function ExchangeRatesConfig() {
             </div>
             {currentRate && (
               <div className="text-xs text-muted-foreground space-y-0.5">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 flex-wrap">
                   <span className="font-medium">{t('settings.exchange.effectiveAt', 'Válida para:')}</span>
                   {new Date(currentRate.effective_at).toLocaleDateString()}
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 flex-wrap">
                   <span className="font-medium">{t('settings.exchange.createdAt', 'Actualizada:')}</span>
                   {new Date(currentRate.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                 </div>
@@ -105,24 +105,24 @@ export default function ExchangeRatesConfig() {
 
           <Button
             variant="default"
-            className="sm:w-auto"
+            className="w-full sm:w-auto"
             onClick={handleSyncBCV}
             disabled={isSyncing}
           >
-            <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`mr-2 h-4 w-4 shrink-0 ${isSyncing ? 'animate-spin' : ''}`} />
             {isSyncing ? t('settings.exchange.syncing', 'Sincronizando...') : t('settings.exchange.forceSync', 'Sincronizar BCV ahora')}
           </Button>
         </CardContent>
       </Card>
 
       {/* CONFIGURACIÓN E HISTORIAL */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Formulario de Configuración */}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Sliders className="h-5 w-5 text-muted-foreground" />
+              <Sliders className="h-5 w-5 text-muted-foreground shrink-0" />
               {t('settings.exchange.configTitle', 'Configuración de Tasa')}
             </CardTitle>
             <CardDescription>
@@ -138,7 +138,7 @@ export default function ExchangeRatesConfig() {
                 <RadioGroup
                   value={currencyUsedValue}
                   onValueChange={(val) => setValue('currency_used', val, { shouldValidate: true })}
-                  className="flex space-x-6"
+                  className="flex flex-col sm:flex-row gap-3 sm:gap-6"
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="USD" id="currency-usd" />
@@ -158,7 +158,7 @@ export default function ExchangeRatesConfig() {
                 <RadioGroup
                   value={bcvModeValue}
                   onValueChange={(val) => setValue('bcv_mode', val as 'auto' | 'manual', { shouldValidate: true })}
-                  className="flex space-x-6"
+                  className="flex flex-col sm:flex-row gap-3 sm:gap-6"
                 >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="auto" id="bcv-auto" />
@@ -191,7 +191,7 @@ export default function ExchangeRatesConfig() {
                 </div>
               )}
 
-              {/* Política de Sincronización (Oculta si la tasa es manual) */}
+              {/* Política de Sincronización */}
               {bcvModeValue !== 'manual' && (
                 <div className="space-y-3">
                   <Label className="text-base font-semibold">{t('settings.exchange.ratePolicyLabel', 'Política de Sincronización de Tasa')}</Label>
@@ -202,7 +202,7 @@ export default function ExchangeRatesConfig() {
                   >
                     {/* Estricta */}
                     <div className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                      <RadioGroupItem value="strict" id="policy-strict" className="mt-1" />
+                      <RadioGroupItem value="strict" id="policy-strict" className="mt-1 shrink-0" />
                       <div className="space-y-1 cursor-pointer" onClick={() => setValue('rate_policy', 'strict', { shouldValidate: true })}>
                         <Label htmlFor="policy-strict" className="font-medium cursor-pointer">
                           {t('settings.exchange.policies.strict.title', 'Estricta (Conservadora de Fines de Semana)')}
@@ -215,7 +215,7 @@ export default function ExchangeRatesConfig() {
 
                     {/* Inmediata */}
                     <div className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                      <RadioGroupItem value="immediate" id="policy-immediate" className="mt-1" />
+                      <RadioGroupItem value="immediate" id="policy-immediate" className="mt-1 shrink-0" />
                       <div className="space-y-1 cursor-pointer" onClick={() => setValue('rate_policy', 'immediate', { shouldValidate: true })}>
                         <Label htmlFor="policy-immediate" className="font-medium cursor-pointer">
                           {t('settings.exchange.policies.immediate.title', 'Inmediata (Actualización en Vivo)')}
@@ -226,9 +226,9 @@ export default function ExchangeRatesConfig() {
                       </div>
                     </div>
 
-                    {/* Smart Holiday / Intermedia */}
+                    {/* Smart Holiday */}
                     <div className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                      <RadioGroupItem value="smart_holiday" id="policy-smart-holiday" className="mt-1" />
+                      <RadioGroupItem value="smart_holiday" id="policy-smart-holiday" className="mt-1 shrink-0" />
                       <div className="space-y-1 cursor-pointer" onClick={() => setValue('rate_policy', 'smart_holiday', { shouldValidate: true })}>
                         <Label htmlFor="policy-smart-holiday" className="font-medium cursor-pointer">
                           {t('settings.exchange.policies.smartHoliday.title', 'Inteligente con Feriados (Intermedia)')}
@@ -254,7 +254,7 @@ export default function ExchangeRatesConfig() {
         <Card>
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <History className="h-5 w-5 text-muted-foreground" />
+              <History className="h-5 w-5 text-muted-foreground shrink-0" />
               {t('settings.exchange.historyTitle', 'Historial Reciente')}
             </CardTitle>
             <CardDescription>
@@ -271,10 +271,10 @@ export default function ExchangeRatesConfig() {
                 {history.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-start justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors gap-2"
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors gap-3"
                   >
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-sm">
                           Bs. {Number(item.rate).toFixed(2)}
                         </span>
@@ -285,23 +285,23 @@ export default function ExchangeRatesConfig() {
                         )}
                       </div>
                       <div className="text-xs text-muted-foreground space-y-0.5">
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 flex-wrap">
                           <span className="font-medium">{t('settings.exchange.effectiveAt', 'Válida para:')}</span>
                           {new Date(item.effective_at).toLocaleDateString()}
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 flex-wrap">
                           <span className="font-medium">{t('settings.exchange.createdAt', 'Actualizada:')}</span>
                           {new Date(item.created_at).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}
                         </div>
                         {item.user && (
-                          <div className="flex items-center gap-1 mt-1 text-xs">
-                            <User className="w-3 h-3 text-muted-foreground" /> 
+                          <div className="flex items-center gap-1 mt-1 text-xs flex-wrap">
+                            <User className="w-3 h-3 text-muted-foreground shrink-0" /> 
                             <span>{item.user.name}</span>
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center self-center">
+                    <div className="flex items-center self-start sm:self-center">
                       {getSourceBadge(item.source)}
                     </div>
                   </div>

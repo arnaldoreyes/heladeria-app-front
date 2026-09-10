@@ -1,13 +1,7 @@
 import type { BulkAction } from './types';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { useTranslation } from 'react-i18next';
-import { X, ChevronDown } from 'lucide-react';
+import { X } from 'lucide-react';
+import { t } from 'i18next';
 
 interface DataTableBulkActionsProps<TData> {
   selectedRows: TData[];
@@ -20,44 +14,50 @@ export function DataTableBulkActions<TData>({
   onClearSelection,
   bulkActions = [],
 }: DataTableBulkActionsProps<TData>) {
-  const { t } = useTranslation('datatable');
 
   if (selectedRows.length === 0) return null;
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between rounded-lg border bg-muted/50 p-3 gap-4">
-      <div className="flex items-center space-x-2">
-        <span className="text-sm font-medium">          
-          {selectedRows.length} {t('selected_other')}
+    <div className="fixed bottom-8 left-1/2 z-50 flex -translate-x-1/2 items-center gap-4 rounded-full border bg-background p-2 pr-4 shadow-xl animate-in slide-in-from-bottom-8">
+      {/* Indicador de cantidad seleccionada */}
+      <div className="flex items-center gap-3 pl-2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+          {selectedRows.length}
+        </div>
+        <span className="text-sm font-semibold tracking-wider text-muted-foreground uppercase hidden sm:inline-block">
+          {t('common.selected')}
         </span>
-        <Button variant="ghost" size="sm" onClick={onClearSelection}>
-          <X className="mr-1 h-3.5 w-3.5" />
-          {t('clean')}
-        </Button>
       </div>
 
-      {/* Acciones masivas movidas a un DropdownMenu para mejor responsive */}
-      {bulkActions.length > 0 && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="w-full sm:w-auto">
-              {t('actions')} <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[200px]">
-            {bulkActions.map((action, index) => (
-              <DropdownMenuItem
-                key={index}
-                onClick={() => action.onClick(selectedRows)}
-                className="cursor-pointer"
-              >
-                {action.icon && <span className="mr-2">{action.icon}</span>}
-                {action.label}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
+      {/* Separador vertical */}
+      <div className="h-6 w-[1px] bg-border" />
+
+      {/* Acciones */}
+      <div className="flex items-center gap-2">
+        {bulkActions.map((action, index) => (
+          <Button
+            key={index}
+            variant="secondary"
+            size="sm"
+            className="rounded-full px-4"
+            onClick={() => action.onClick(selectedRows)}
+          >
+            {action.icon && <span className="mr-2 h-4 w-4">{action.icon}</span>}
+            {action.label}
+          </Button>
+        ))}
+        
+        {/* Botón para limpiar selección */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={onClearSelection}
+          className="ml-1 h-8 w-8 rounded-full text-muted-foreground hover:text-foreground"
+          title={t('clean')}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }

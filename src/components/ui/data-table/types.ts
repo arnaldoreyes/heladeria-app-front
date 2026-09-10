@@ -1,4 +1,4 @@
-import type { ColumnDef, OnChangeFn, SortingState } from '@tanstack/react-table';
+import type { ColumnDef, OnChangeFn, SortingState, Row } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
 
 export interface PaginationState {
@@ -49,4 +49,6 @@ export interface DataTableProps<TData> {
   
   sorting?: SortingState;
   onSortingChange?: OnChangeFn<SortingState>;
+  defaultViewMode?: 'table' | 'grid';
+  renderGridCard?: (row: Row<TData>) => ReactNode;
 }

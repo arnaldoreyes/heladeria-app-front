@@ -15,6 +15,7 @@ export function createActionsColumn<TData>(
 ): ColumnDef<TData, any> {
   return {
     id: 'actions',
+    meta: { hideInGrid: true },
     header: () => <div className="text-right">{headerLabel}</div>,
     cell: ({ row }) => {
       const data = row.original as TData;

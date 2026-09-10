@@ -6,9 +6,7 @@ import {
   tableFeatures,
   rowSelectionFeature,
   rowSortingFeature,
-  
   type RowSelectionState,
-  type SortingState,
 } from '@tanstack/react-table';
 import {
   Table,
@@ -22,7 +20,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { DataTableToolbar } from './DataTableToolbar';
 import { DataTablePagination } from './DataTablePagination';
 import { DataTableBulkActions } from './DataTableBulkActions';
+import { DefaultGridCard } from './DefaultGridCard'; // Importamos la nueva tarjeta por defecto
 import type { DataTableProps } from './types';
+import { cn } from '@/lib/utils';
 
 const features = tableFeatures({
   rowSelectionFeature,
@@ -48,22 +48,27 @@ export function DataTable<TData>({
   onBulkActions,
   sorting,
   onSortingChange,
+  defaultViewMode = 'table', // Valor por defecto
+  renderGridCard,            // Prop para tarjeta personalizada
 }: DataTableProps<TData>) {
   const { t } = useTranslation('datatable');
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  
+  // Estado para manejar si estamos en modo tabla o grid usando la prop por defecto
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>(defaultViewMode);
+  
   const table = useTable({
     features,
     data,
     columns,
     state: {
       rowSelection,
-      ...(sorting ? { sorting } : {})
+      ...(sorting ? { sorting } : {}),
     },
-    manualSorting: true, 
+    manualSorting: true,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
-    onSortingChange, 
-    
+    onSortingChange,
   });
 
   const selectedRows = table
@@ -82,16 +87,57 @@ export function DataTable<TData>({
         showSearch={showSearch}
         showAdd={showAdd}
         showFilters={showFilters}
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        isAllSelected={table.getIsAllPageRowsSelected()}
+        onToggleSelectAll={table.getToggleAllPageRowsSelectedHandler()}
+        table={table}
       />
 
-      
       <DataTableBulkActions
         selectedRows={selectedRows}
         onClearSelection={() => setRowSelection({})}
         bulkActions={onBulkActions}
       />
 
-      <div className="rounded-md border bg-card">
+      {/* VISTA GRID/MÓVIL */}
+      <div 
+        className={cn(
+          "grid gap-4",
+          // Responsividad mejorada: de 1 columna en móvil a 2, 3 o 4 según el espacio
+          viewMode === 'table' ? "grid-cols-1 md:hidden" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+        )}
+      >
+        {isLoading ? (
+          Array.from({ length: pagination?.pageSize || 5 }).map((_, i) => (
+            <div key={i} className="p-4 rounded-lg border bg-card space-y-3">
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+              <Skeleton className="h-4 w-1/4" />
+            </div>
+          ))
+        ) : table.getRowModel().rows?.length ? (
+          table.getRowModel().rows.map((row) => {
+            return (
+              <div key={row.id} className="relative h-full">
+                {renderGridCard ? renderGridCard(row) : <DefaultGridCard row={row} />}
+              </div>
+            );
+          })
+        ) : (
+          <div className="p-8 text-center text-muted-foreground border rounded-lg bg-card md:col-span-full">
+            {t('empty_table')}
+          </div>
+        )}
+      </div>
+
+      {/* VISTA DESKTOP: Tabla Tradicional */}
+      <div 
+        className={cn(
+          "rounded-md border bg-card overflow-x-auto",
+          viewMode === 'grid' ? "hidden" : "hidden md:block"
+        )}
+      >
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -157,7 +203,6 @@ export function DataTable<TData>({
           onPageSizeChange={onPageSizeChange}
         />
       )}
-
     </div>
   );
 }

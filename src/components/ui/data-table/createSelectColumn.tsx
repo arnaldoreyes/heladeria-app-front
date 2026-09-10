@@ -4,6 +4,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 export function createSelectColumn<TData>(): ColumnDef<TData, any> {
   return {
     id: 'select',
+    meta: { hideInGrid: true },
     header: ({ table }) => {
       const t = table as any; // Casteo de seguridad si los tipos de v9 son muy restrictivos
       return (
