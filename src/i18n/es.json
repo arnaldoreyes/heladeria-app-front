@@ -53,19 +53,100 @@
         "Other": "Otro"
       }
     }
-  
   },
-  "common": {
-      "reload": "Recargar",
-      "goHome": "Ir al inicio",
-      "backToHome": "Volver al Inicio",
-      "pleaseWait": "Por favor espera..."
-    },
-    "errors": {
-      "oops": "¡Ups!",
-      "unexpected": "Ha ocurrido un error inesperado en la aplicación.",
-      "somethingWentWrong": "Algo salió mal",
-      "notFoundTitle": "Página no encontrada",
-      "notFoundDescription": "Lo sentimos, la página que estás buscando no existe o fue movida a otra dirección."
+ "common": {
+    "name": "Nombre",
+    "currency": "Moneda",
+    "status": "Estado",
+    "active": "Activo",
+    "inactive": "Inactivo",
+    "actions": "Acciones",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "all": "Todas",
+    "select": "Seleccionar",
+    "select_placeholder": "Seleccione un tipo...",
+    "email": "Correo electrónico",
+    "status_active": "Activo",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "confirm_delete_title": "¿Estás seguro?",
+    "confirm_delete_desc": "Esta acción no se puede deshacer. El registro será eliminado permanentemente.",
+    "confirm_bulk_delete_title": "Eliminar registros seleccionados",
+    "confirm_bulk_delete_desc": "Vas a eliminar {{count}} registros. Esta acción no se puede deshacer.",
+    "delete_all": "Eliminar Todos",
+    "currencies": {
+      "ves": "Bolívares (VES)",
+      "usd": "Dólares (USD)",
+      "eur": "Euros (EUR)"
     }
+  },
+  "settings": {
+    "exchange": {
+      "manualRatePlaceholder": "Ej. 38.50",
+      "ratePolicyLabel": "Política de Sincronización de Tasa",
+      "policies": {
+        "strict": {
+          "title": "Estricta (Conservadora de Fines de Semana)",
+          "desc": "Mantiene la tasa actual. Durante el fin de semana congela la tasa del viernes hasta el lunes a las 00:00."
+        },
+        "immediate": {
+          "title": "Inmediata (Actualización en Vivo)",
+          "desc": "Apenas el BCV publica la tasa (aprox. 4:00 PM), la adopta de inmediato sin importar si es fin de semana o feriado."
+        },
+        "smartHoliday": {
+          "title": "Inteligente con Feriados (Intermedia)",
+          "desc": "De lunes a viernes usa la tasa del día. Sábados, domingos o feriados usa automáticamente la tasa futura si ya está cargada."
+        }
+      }
+    },
+    "payments": {
+      "search": "Buscar métodos...",
+      "add": "Añadir Método",
+      "edit": "Editar Método de Pago",
+      "currency": "Moneda",
+      "type": "Tipo de Pago",
+      "bank": "Banco",
+      "document": "Cédula / RIF",
+      "account": "Número de Cuenta / Teléfono",
+      "create_title": "Nuevo Método de Pago",
+      "edit_title": "Editar Método de Pago",
+      "bulk_activate": "Activar Seleccionados",
+      "bulk_deactivate": "Desactivar Seleccionados",
+      "bulk_export": "Exportar CSV",
+      "bulk_delete": "Eliminar Masivo",
+      "form": {
+        "type": "Tipo de Pago (Zelle, Pago Móvil, etc)",
+        "name": "Nombre Público",
+        "name_ph": "Ej. Pago Móvil Banesco",
+        "email": "Correo electrónico",
+        "email_ph": "Ej. pago@empresa.com",
+        "bank": "Banco",
+        "bank_ph": "Ej. Banesco",
+        "account": "Número de Cuenta / Teléfono",
+        "account_ph": "Ej. 04141234567",
+        "document": "Cédula / RIF",
+        "document_ph": "Ej. V-12345678"
+      },
+      "messages": {
+        "saved_success": "Método de pago guardado correctamente",
+        "saved_error": "Error al guardar el método de pago",
+        "deleted_success": "Método de pago eliminado correctamente",
+        "deleted_error": "No se pudo eliminar el método de pago",
+        "bulk_deleted_success": "Registros eliminados exitosamente",
+        "bulk_deleted_error": "No se pudieron eliminar los registros",
+        "bulk_status_success": "Estados actualizados exitosamente",
+        "bulk_status_error": "No se pudieron actualizar los estados"
+      }
+    }
+  },
+  "errors": {
+    "oops": "¡Ups!",
+    "unexpected": "Ha ocurrido un error inesperado en la aplicación.",
+    "somethingWentWrong": "Algo salió mal",
+    "notFoundTitle": "Página no encontrada",
+    "notFoundDescription": "Lo sentimos, la página que estás buscando no existe o fue movida a otra dirección."
+  }
+    
 }
