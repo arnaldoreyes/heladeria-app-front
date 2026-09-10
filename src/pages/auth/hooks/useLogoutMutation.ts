@@ -8,25 +8,21 @@ import { logoutAction } from '../actions/logout.action';
 export function useLogoutMutation() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  
   const logoutStore = useAuthStore((s) => s.logout);
 
   return useMutation({
     mutationFn: logoutAction,
-    
-    // Tanto en éxito como en error, limpiamos localmente para asegurar que el usuario salga
-    onSettled: () => {
-      logoutStore();
-    },
 
     onSuccess: () => {
       toast.success(t('auth.toast.loggedOut') || 'Sesión cerrada correctamente');
+      logoutStore();
       navigate('/login', { replace: true });
     },
-    
+
     onError: (error) => {
       console.error('Logout error:', error);
       toast.error(t('auth.toast.logoutError') || 'Sesión cerrada localmente');
+      logoutStore();
       navigate('/login', { replace: true });
     },
   });

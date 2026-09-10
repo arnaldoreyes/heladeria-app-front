@@ -1,9 +1,9 @@
 import type { User } from '@/interfaces/user.interface';
-import type { Business } from '@/types';
+import type { BusinessFormData } from '@/pages/settings/schemas/settings.schema';
 
 export interface AuthResponse {
   user: User;
-  business: Business;
+  business: BusinessFormData;
   access_token: string;
   expires_at: string;
   message: string;

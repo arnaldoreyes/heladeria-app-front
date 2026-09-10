@@ -17,14 +17,9 @@ export const CheckAuthProvider = ({ children }: PropsWithChildren) => {
   });
 
   useEffect(() => {
-    if (!_hasHydrated) return;
+    if (!_hasHydrated || authStatus !== 'checking') return;
 
-    if (!access_token && authStatus === 'checking') {
-      setAuthStatus('not-authenticated');
-      return;
-    }
-
-    if (query.isSuccess && query.data && authStatus === 'checking') {
+    if (query.isSuccess && query.data) {
       setSession({
         user: query.data.user,
         business: query.data.business,
@@ -34,16 +29,17 @@ export const CheckAuthProvider = ({ children }: PropsWithChildren) => {
       });
     }
 
-    if (query.isError && authStatus === 'checking') {
+    if (query.isError) {
       logout();
     }
-  }, [_hasHydrated, access_token, authStatus, query.isSuccess, query.data, query.isError, setSession, logout, setAuthStatus]);
+  }, [_hasHydrated, authStatus, query.isSuccess, query.isError, query.data, access_token, setSession, logout]);
 
-  if (!_hasHydrated || (query.isLoading && !!access_token && authStatus === 'checking')) {
-    return <CustomFullScreenLoading />;
+  // Manejo inmediato si no hay token al hidratar
+  if (_hasHydrated && !access_token && authStatus === 'checking') {
+    setAuthStatus('not-authenticated');
   }
 
-  if (authStatus === 'checking' && access_token) {
+  if (!_hasHydrated || (authStatus === 'checking' && access_token && query.isLoading)) {
     return <CustomFullScreenLoading />;
   }
 

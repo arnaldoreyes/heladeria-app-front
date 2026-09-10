@@ -1,36 +1,37 @@
-export type Currency = 'USD' | 'BS';
-
-export type RoleName = 'Superadmin' | 'Business Owner' | 'Cashier';
-
-export type PaymentMethod = 'transfer' | 'cash_usd' | 'cash_bs';
-
-export type SaleStatus = 'completed' | 'voided';
-
-export type BudgetStatus = 'active' | 'converted' | 'expired';
-
-export type StockLevel = 'high' | 'low' | 'out';
-
-export interface Business {
-  id: string;
-  name: string;
-  niche: string;
-  slug: string;
-  status: 'active' | 'inactive';
-  settings: BuisinessSettings;
+// Interface para respuestas de error de la API
+export interface ErrorResponse {
+  success?: false;
+  message: string;
+  errors?: Record<string, string[]>;
 }
 
-export interface BuisinessSettings {
-  id: string;
-  bcv_mode: boolean;
-  default_profit_percentage: number;
-  default_reinvestment_percentage: number;
-  print_ticket_on_sale: boolean;
-  ticket_header_notes: string;
-  ticket_footer_notes: string;
-}   
+// Interface genérica para respuestas exitosas de la API
+export interface SuccessResponse<T = any> {
+  success?: true;
+  message?: string;
+  data: T;
+  meta?: {
+    current_page?: number;
+    from?: number;
+    last_page?: number;
+    links?: 
+      {
+          url?: string,
+          label?: string;
+          page?: number;
+          active?: boolean;
+      }[];
+    path?: string;
+    per_page?: number;
+    to?: number;
+    total?: number;
 
-export interface Role {
-  id: string;
-  name: RoleName;
-  permissions: Record<string, boolean>;
+  };
+  links?: {
+    first?: string;
+    last?:string;
+    next?:string;
+    prev?:string;
+  };
 }
+

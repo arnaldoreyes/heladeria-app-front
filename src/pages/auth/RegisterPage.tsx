@@ -21,8 +21,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Slider } from '@/components/ui/slider';
 import { useRegisterMutation } from './hooks/useRegisterMutation.ts';
+import { DistributionRulesSlider } from '@/components/custom/DistributionRulesSlider.tsx';
 
 export default function RegisterPage() {
   const { t } = useTranslation();
@@ -50,7 +50,7 @@ export default function RegisterPage() {
 
   const baseCurrency = watch('baseCurrency');
   const businessFundPercent = watch('businessFundPercent') ?? 60;
-  const personalProfitPercent = 100 - businessFundPercent;
+  const personalProfitPercent = watch('personalProfitPercent') ?? 40;
 
   const onSubmit = (data: RegisterValues) => {
     registerBusiness(data);
@@ -166,35 +166,15 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <div className="space-y-3 rounded-lg border border-border/60 bg-muted/30 p-4">
-            <div>
-              <Label>{t('auth.register.distributionRulesTitle')}</Label>
-              <p className="text-xs text-muted-foreground">
-                {t('auth.register.distributionRulesSubtitle')}
-              </p>
-            </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">{t('auth.register.businessFund')}</span>
-                <span className="font-mono text-primary">{businessFundPercent}%</span>
-              </div>
-             <Slider
-              value={[businessFundPercent]}
-              min={0}
-              max={100}
-              step={5}
-              onValueChange={(values: number | readonly number[]) => {
-                const val = Array.isArray(values) ? values[0] : values;
-                setValue('businessFundPercent', val, { shouldValidate: true, shouldDirty: true });
-                setValue('personalProfitPercent', 100 - val, { shouldValidate: true, shouldDirty: true });
-              }}
-            />
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">{t('auth.register.personalProfit')}</span>
-                <span className="font-mono text-primary">{personalProfitPercent}%</span>
-              </div>
-            </div>
-          </div>
+          {/* COMPONENTE DE SLIDER IMPLEMENTADO */}
+          <DistributionRulesSlider
+            businessFundPercent={businessFundPercent}
+            personalProfitPercent={personalProfitPercent}
+            onChange={(businessVal, personalVal) => {
+              setValue('businessFundPercent', businessVal, { shouldValidate: true, shouldDirty: true });
+              setValue('personalProfitPercent', personalVal, { shouldValidate: true, shouldDirty: true });
+            }}
+          />
 
           <Button type="submit" className="w-full" disabled={isPending}>
             {isPending ? (
