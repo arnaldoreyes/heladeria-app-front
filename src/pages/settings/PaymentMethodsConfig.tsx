@@ -46,6 +46,13 @@ export default function PaymentMethodsConfig() {
     sorting, 
     setSorting,
     handleBulkStatus,
+    
+    page,
+    setPage,
+    perPage,
+    setPerPage,
+    pageCount,
+    totalRecords,
   } = usePaymentMethods({
     search: debouncedSearch,
     currency: currencyFilter !== 'ALL' ? currencyFilter : undefined
@@ -121,6 +128,17 @@ export default function PaymentMethodsConfig() {
             onDelete={(id) => setDeletingId(id)}
           />
         )}
+        pagination={{
+          pageIndex: page,
+          pageSize: perPage,
+          pageCount: pageCount,
+          total: totalRecords, // o total: totalRecords según la interfaz de tu DataTablePagination
+        }}
+        onPageChange={setPage}
+        onPageSizeChange={(newPerPage) => {
+          setPerPage(newPerPage);
+          setPage(1);
+        }}
       />
 
       {/* --- MODAL CREAR / EDITAR --- */}

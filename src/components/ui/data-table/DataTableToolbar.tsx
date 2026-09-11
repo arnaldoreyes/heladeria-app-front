@@ -69,7 +69,7 @@ export function DataTableToolbar<TData>({
   console.log(sortableColumns);
 
   return (
-    <div className="flex flex-wrap items-center justify-center justify-md-between gap-4">
+    <div className="flex flex-wrap items-center justify-center md:justify-between gap-4">
       {/* Buscador */}
       <div className="flex flex-1 items-center min-w-[200px] max-w-sm">
         {showSearch && (

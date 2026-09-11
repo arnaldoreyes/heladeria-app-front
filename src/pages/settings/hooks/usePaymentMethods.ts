@@ -37,6 +37,8 @@ const DEFAULT_FORM_VALUES: PaymentMethodFormData = {
 export function usePaymentMethods(filters: FilterParams = {}) {
   const { t } = useTranslation(['settings', 'common']);
   const queryClient = useQueryClient();
+  const [page, setPage] = useState<number>(1);
+  const [perPage, setPerPage] = useState<number>(10);
 
   // --- 1. ESTADOS LOCALES ---
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,10 +62,12 @@ export function usePaymentMethods(filters: FilterParams = {}) {
 
   // --- 3. QUERIES (Lectura de datos) ---
   const { data: methodsResponse, isLoading: isLoadingMethods } = useQuery({
-    queryKey: ['payment-methods', filters.search, filters.currency, sortBy, sortOrder],
+    queryKey: ['payment-methods', filters.search, filters.currency, sortBy, sortOrder, page, perPage],
     queryFn: () =>
       getPaymentMethodsAction({
         ...filters,
+        page,
+        per_page: perPage,
         sort_by: sortBy,
         sort_order: sortOrder,
       }),
@@ -171,6 +175,10 @@ export function usePaymentMethods(filters: FilterParams = {}) {
     bulkStatusMutation.mutate({ ids, is_active });
   };
 
+  
+  const totalRecords = methodsResponse?.meta?.total ?? 0;
+  const pageCount = methodsResponse?.meta?.last_page ?? Math.ceil(totalRecords / perPage) ?? 1;
+
   // --- 6. RETORNO ---
   return {
     // Datos de la API
@@ -204,5 +212,12 @@ export function usePaymentMethods(filters: FilterParams = {}) {
     // Estado de Ordenamiento
     sorting,
     setSorting,
+    
+    page,
+    setPage,
+    perPage,
+    setPerPage,
+    pageCount,
+    totalRecords,
   };
 }
