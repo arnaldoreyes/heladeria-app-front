@@ -15,6 +15,9 @@ import BusinessSettings from '@/pages/settings/BusinessSettings';
 import PaymentMethodsConfig from '@/pages/settings/PaymentMethodsConfig';
 import ExchangeRatesConfig from '@/pages/settings/ExchangeRatesConfig';
 import InventoryLayout from '@/pages/inventory/InventoryLayout';
+import ProductsList from '@/pages/inventory/ProductsList';
+import CategoriesList from '@/pages/inventory/CategoryList';
+//import RestockList from '@/pages/inventory/RestockList';
 
 // AdminPages
 
@@ -68,9 +71,9 @@ export const router = createBrowserRouter([
         Component: InventoryLayout, 
         children: [
           { index: true, element: <Navigate to="products" replace /> },
-          { path: 'products', Component: /* ProductsList */ () => <div>Productos</div> },      
-          { path: 'categories', Component: /* CategoriesList */ () => <div>Categorías</div> },         
-          { path: 'restocks', Component: /* RestocksList */ () => <div>Compras/Reabastecimiento</div> },
+          { path: 'products', Component: ProductsList },      
+          { path: 'categories', Component: CategoriesList },         
+          //{ path: 'restocks', Component:  RestockList },
           { path: 'history', Component: /* InventoryMovements */ () => <div>Movimientos</div> },
         ]
       },
