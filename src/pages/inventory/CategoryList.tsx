@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
-import { Trash2, CheckCircle, XCircle, Plus } from 'lucide-react';
+import { Trash2, Plus } from 'lucide-react';
 
 import { DataTable } from '@/components/ui/data-table/DataTable';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';

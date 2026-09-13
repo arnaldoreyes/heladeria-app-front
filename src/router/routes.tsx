@@ -18,6 +18,8 @@ import InventoryLayout from '@/pages/inventory/InventoryLayout';
 import ProductsList from '@/pages/inventory/ProductsList';
 import CategoriesList from '@/pages/inventory/CategoryList';
 import SuppliersList from '@/pages/inventory/SuppliersList';
+import ExpensesList from '@/pages/inventory/ExpensesList';
+
 // AdminPages
 
 export const router = createBrowserRouter([
@@ -76,6 +78,7 @@ export const router = createBrowserRouter([
           { path: 'categories', Component: CategoriesList },      
           { path: 'suppliers', Component:  SuppliersList },
           { path: 'history', Component: /* InventoryMovements */ () => <div>Movimientos</div> },
+          { path: 'expenses', Component:  ExpensesList},
         ]
       },
 

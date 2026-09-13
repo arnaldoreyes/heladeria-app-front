@@ -26,6 +26,11 @@ export default function InventoryLayout() {
       label: t('inventory.nav.restocks', 'Reabastecimientos'), 
       icon: ShoppingCart 
     },
+      { 
+      path: '/admin/inventory/expenses', 
+      label: t('inventory.nav.exponse', 'Gastos'), 
+      icon: Receipt
+    },
     { 
       path: '/admin/inventory/history', 
       label: t('inventory.nav.history', 'Movimientos'), 
