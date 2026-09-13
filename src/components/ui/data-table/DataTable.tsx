@@ -1,13 +1,15 @@
-import { useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
-  flexRender,
-  useTable,
   tableFeatures,
   rowSelectionFeature,
   rowSortingFeature,
+  useTable,
   type RowSelectionState,
-} from '@tanstack/react-table';
+  type ColumnDef,
+  type OnChangeFn,
+  type SortingState,
+} from '@tanstack/react-table'
 import {
   Table,
   TableBody,
@@ -15,21 +17,63 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Skeleton } from '@/components/ui/skeleton';
-import { DataTableToolbar } from './DataTableToolbar';
-import { DataTablePagination } from './DataTablePagination';
-import { DataTableBulkActions } from './DataTableBulkActions';
-import { DefaultGridCard } from './DefaultGridCard'; // Importamos la nueva tarjeta por defecto
-import type { DataTableProps } from './types';
-import { cn } from '@/lib/utils';
+} from '@/components/ui/table'
+import { Skeleton } from '@/components/ui/skeleton'
+import { DataTableToolbar } from './DataTableToolbar'
+import { DataTablePagination } from './DataTablePagination'
+import { DataTableBulkActions } from './DataTableBulkActions'
+import { DefaultGridCard } from './DefaultGridCard'
+import { cn } from '@/lib/utils'
 
+// 1. Definir las features que utilizará la tabla
 const features = tableFeatures({
   rowSelectionFeature,
   rowSortingFeature,
-});
+})
 
-export function DataTable<TData>({
+// 2. Extender los tipos globales de TanStack Table para reconocer las features registradas
+declare module '@tanstack/react-table' {
+  interface Register {
+    tableFeatures: typeof features
+  }
+}
+
+interface DataTableProps<TData extends Record<string, any>> {
+  // Ajuste clave: Permitir que ColumnDef acepte tanto las features de v9 como TData
+  columns: ColumnDef<typeof features, TData>[]
+  data: TData[]
+  isLoading?: boolean
+  pagination?: {
+    pageIndex: number
+    pageSize: number
+    pageCount: number
+    total?: number
+  }
+  onPageChange?: (page: number) => void
+  onPageSizeChange?: (pageSize: number) => void
+  searchValue?: string
+  onSearchChange?: (value: string) => void
+  searchPlaceholder?: string
+  onAdd?: () => void
+  addLabel?: string
+  filterComponents?: React.ReactNode
+  showSearch?: boolean
+  showAdd?: boolean
+  showFilters?: boolean
+  onBulkActions?: Array<{
+    label: string
+    icon?: React.ReactNode
+    variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link'
+    onClick: (selectedRows: TData[]) => void
+  }>
+  sorting?: SortingState
+  onSortingChange?: OnChangeFn<SortingState>
+  defaultViewMode?: 'table' | 'grid'
+  renderGridCard?: (row: any) => React.ReactNode
+}
+
+// 3. Añadir el constraint `extends Record<string, any>` al componente genérico
+export function DataTable<TData extends Record<string, any>>({
   columns,
   data,
   isLoading = false,
@@ -48,32 +92,33 @@ export function DataTable<TData>({
   onBulkActions,
   sorting,
   onSortingChange,
-  defaultViewMode = 'table', // Valor por defecto
-  renderGridCard,            // Prop para tarjeta personalizada
+  defaultViewMode = 'table',
+  renderGridCard,
 }: DataTableProps<TData>) {
-  const { t } = useTranslation('datatable');
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  
-  // Estado para manejar si estamos en modo tabla o grid usando la prop por defecto
-  const [viewMode, setViewMode] = useState<'table' | 'grid'>(defaultViewMode);
-  
-  const table = useTable({
-    features,
-    data,
-    columns,
-    state: {
-      rowSelection,
-      ...(sorting ? { sorting } : {}),
+  const { t } = useTranslation('datatable')
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>(defaultViewMode)
+
+  const table = useTable(
+    {
+      features,
+      data,
+      columns,
+      state: {
+        rowSelection,
+        ...(sorting ? { sorting } : {}),
+      },
+      enableRowSelection: true,
+      manualSorting: true,
+      onRowSelectionChange: setRowSelection,
+      onSortingChange,
     },
-    manualSorting: true,
-    enableRowSelection: true,
-    onRowSelectionChange: setRowSelection,
-    onSortingChange,
-  });
+    (state) => state
+  )
 
   const selectedRows = table
-    .getFilteredSelectedRowModel()
-    .rows.map((row) => row.original as TData);
+    .getSelectedRowModel()
+    .rows.map((row) => row.original as TData)
 
   return (
     <div className="w-full space-y-4">
@@ -101,11 +146,12 @@ export function DataTable<TData>({
       />
 
       {/* VISTA GRID/MÓVIL */}
-      <div 
+      <div
         className={cn(
-          "grid gap-4",
-          // Responsividad mejorada: de 1 columna en móvil a 2, 3 o 4 según el espacio
-          viewMode === 'table' ? "grid-cols-1 md:hidden" : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+          'grid gap-4',
+          viewMode === 'table'
+            ? 'grid-cols-1 md:hidden'
+            : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
         )}
       >
         {isLoading ? (
@@ -117,25 +163,23 @@ export function DataTable<TData>({
             </div>
           ))
         ) : table.getRowModel().rows?.length ? (
-          table.getRowModel().rows.map((row) => {
-            return (
-              <div key={row.id} className="relative h-full">
-                {renderGridCard ? renderGridCard(row) : <DefaultGridCard row={row} />}
-              </div>
-            );
-          })
+          table.getRowModel().rows.map((row) => (
+            <div key={row.id} className="relative h-full">
+              {renderGridCard ? renderGridCard(row) : <DefaultGridCard row={row} />}
+            </div>
+          ))
         ) : (
           <div className="p-8 text-center text-muted-foreground border rounded-lg bg-card md:col-span-full">
-            {t('empty_table')}
+            {t('datatable.empty_table')}
           </div>
         )}
       </div>
 
       {/* VISTA DESKTOP: Tabla Tradicional */}
-      <div 
+      <div
         className={cn(
-          "rounded-md border bg-card overflow-x-auto",
-          viewMode === 'grid' ? "hidden" : "hidden md:block"
+          'rounded-md border bg-card overflow-x-auto',
+          viewMode === 'grid' ? 'hidden' : 'hidden md:block'
         )}
       >
         <Table>
@@ -144,12 +188,9 @@ export function DataTable<TData>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                    {header.isPlaceholder ? null : (
+                      <table.FlexRender header={header} />
+                    )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -174,10 +215,7 @@ export function DataTable<TData>({
                 >
                   {row.getAllCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+                      <table.FlexRender cell={cell} />
                     </TableCell>
                   ))}
                 </TableRow>
@@ -188,7 +226,7 @@ export function DataTable<TData>({
                   colSpan={columns.length}
                   className="h-24 text-center text-muted-foreground"
                 >
-                  {t('empty_table')}
+                  {t('datatable.empty_table')}
                 </TableCell>
               </TableRow>
             )}
@@ -204,5 +242,5 @@ export function DataTable<TData>({
         />
       )}
     </div>
-  );
+  )
 }

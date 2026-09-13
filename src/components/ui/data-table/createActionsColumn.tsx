@@ -9,10 +9,10 @@ export interface RowAction<TData> {
   show?: (row: TData) => boolean;
 }
 
-export function createActionsColumn<TData>(
+export function createActionsColumn<TData extends Record<string, any>>(
   actions: RowAction<TData>[],
   headerLabel = 'Acciones'
-): ColumnDef<TData, any> {
+): ColumnDef<any, TData> {
   return {
     id: 'actions',
     meta: { hideInGrid: true },

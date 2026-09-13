@@ -8,12 +8,13 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useExchangeRates } from './hooks/useExchgeRates';
+import { useActiveExchangeRate } from './hooks/useActiveExchangeRate';
+import { useExchangeRates } from './hooks/useExchangeRates';
 
 export default function ExchangeRatesConfig() {
   const { t } = useTranslation();
+  const { currentRate } = useActiveExchangeRate();
   const {
-    currentRate,
     history,
     isLoading,
     form: { register, setValue, formState: { errors } },
@@ -24,7 +25,8 @@ export default function ExchangeRatesConfig() {
     handleSyncBCV,
     isSaving,
     isSyncing,
-  } = useExchangeRates();
+  } = useExchangeRates()
+
 
   const getSourceBadge = (source?: string) => {
     switch (source) {

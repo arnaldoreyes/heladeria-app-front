@@ -1,22 +1,24 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { useEffect } from 'react';
-import { updateExchangeConfigSchema, type UpdateExchangeConfigPayload } from '../schemas/exchange-rate.schema';
-import { getExchangeRatesAction, syncExchangeRateAction, updateExchangeConfigAction } from '../actions/exchange-rates.action';
 
-export const QUERY_KEY_EXCHANGE_RATES = ['exchange-rates'];
+import { 
+  updateExchangeConfigSchema, 
+  type UpdateExchangeConfigPayload 
+} from '../schemas/exchange-rate.schema';
+import { 
+  updateExchangeConfigAction, 
+  syncExchangeRateAction 
+} from '../actions/exchange-rates.action';
+import { QUERY_KEY_EXCHANGE_RATES, useActiveExchangeRate } from './useActiveExchangeRate';
 
 export function useExchangeRates() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-
-  const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: QUERY_KEY_EXCHANGE_RATES,
-    queryFn: getExchangeRatesAction,
-  });
+  const { currentRate, bcvMode, currencyUsed, ratePolicy, isLoading, isError, refetch } = useActiveExchangeRate();
 
   const form = useForm<UpdateExchangeConfigPayload>({
     resolver: zodResolver(updateExchangeConfigSchema),
@@ -29,15 +31,15 @@ export function useExchangeRates() {
   });
 
   useEffect(() => {
-    if (data) {
+    if (currentRate || bcvMode) {
       form.reset({
-        bcv_mode: data.bcv_mode ?? 'auto',
-        currency_used: data.currency_used ?? 'USD',
-        rate_policy: data.rate_policy ?? 'strict',
-        rate: data.bcv_mode === 'manual' ? data.current_rate?.rate : undefined,
+        bcv_mode: bcvMode,
+        currency_used: currencyUsed,
+        rate_policy: ratePolicy,
+        rate: bcvMode === 'manual' && currentRate ? Number(currentRate.rate) : undefined,
       });
     }
-  }, [data, form]);
+  }, [currentRate, bcvMode, currencyUsed, ratePolicy, form]);
 
   const configMutation = useMutation({
     mutationFn: updateExchangeConfigAction,
@@ -71,23 +73,18 @@ export function useExchangeRates() {
   };
 
   return {
-    currentRate: data?.current_rate ?? null,
-    history: data?.history ?? [],
-    bcvMode: data?.bcv_mode ?? 'auto',
-    currencyUsed: data?.currency_used ?? 'USD',
-    ratePolicy: data?.rate_policy ?? 'smart',
-    isLoading,
-    isError,
-
     form,
     bcvModeValue: form.watch('bcv_mode'),
     currencyUsedValue: form.watch('currency_used'),
     ratePolicyValue: form.watch('rate_policy'),
 
-    handleSubmitConfig,
-    handleSyncBCV,
+    isLoading,
+    isError,
     isSaving: configMutation.isPending,
     isSyncing: syncMutation.isPending,
+
+    handleSubmitConfig,
+    handleSyncBCV,
     refetch,
   };
 }

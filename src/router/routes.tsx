@@ -17,8 +17,7 @@ import ExchangeRatesConfig from '@/pages/settings/ExchangeRatesConfig';
 import InventoryLayout from '@/pages/inventory/InventoryLayout';
 import ProductsList from '@/pages/inventory/ProductsList';
 import CategoriesList from '@/pages/inventory/CategoryList';
-//import RestockList from '@/pages/inventory/RestockList';
-
+import SuppliersList from '@/pages/inventory/SuppliersList';
 // AdminPages
 
 export const router = createBrowserRouter([
@@ -56,15 +55,17 @@ export const router = createBrowserRouter([
       // Dashboard (Analytics)
       { path: 'dashboard', Component: /* DashboardPage */ () => <div>Dashboard</div> },
 
-      // Ventas y Clientes (Cajeros, Dueños, Superadmin)
-      { path: 'sales', Component: /* SalesList */ () => <div>Ventas</div> },
-      { path: 'sales/new', Component: /* POSInterface */ () => <div>Nueva Venta (Punto de Venta)</div> },
-      { path: 'sales/:id', Component: /* SaleDetails */ () => <div>Detalle Venta</div> },
-      
-      { path: 'customers', Component: /* CustomersList */ () => <div>Clientes</div> },
-      { path: 'customers/new', Component: /* CustomerForm */ () => <div>Nuevo Cliente</div> },
-      { path: 'customers/:id/edit', Component: /* CustomerForm */ () => <div>Editar Cliente</div> },
-
+      // Ventas y Clientes
+      { 
+        path: 'sales', 
+        Component: InventoryLayout, 
+        children: [
+          {  index: true,  Component: /* SalesList */ () => <div>Ventas</div> },
+          { path: 'history', Component: /* InventoryMovements */ () => <div>Ventas</div> },
+          { path: 'customers', Component: /* CustomersList */ () => <div>Clientes</div> },
+        ]
+      },
+     
       // Catálogo (Productos y Categorías)
       { 
         path: 'inventory', 
@@ -72,44 +73,22 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="products" replace /> },
           { path: 'products', Component: ProductsList },      
-          { path: 'categories', Component: CategoriesList },         
-          //{ path: 'restocks', Component:  RestockList },
+          { path: 'categories', Component: CategoriesList },      
+          { path: 'suppliers', Component:  SuppliersList },
           { path: 'history', Component: /* InventoryMovements */ () => <div>Movimientos</div> },
         ]
       },
-      { path: 'products', Component: /* ProductsList */ () => <div>Productos</div> },      
-      { path: 'categories', Component: /* CategoriesList */ () => <div>Categorías</div> },
-
-      // Inventario y Abastecimiento
-      { path: 'inventory', Component: /* InventoryMovements */ () => <div>Movimientos de Inventario</div> },
-      { path: 'restocks', Component: /* RestocksList */ () => <div>Reabastecimientos (Compras)</div> },
-      { path: 'restocks/new', Component: /* RestockForm */ () => <div>Nueva Compra</div> },
-
-      // Finanzas (Gastos)
-      { path: 'expenses', Component: /* ExpensesList */ () => <div>Gastos</div> },
-      { path: 'expenses/new', Component: /* ExpenseForm */ () => <div>Nuevo Gasto</div> },
-
-      // Equipo (Usuarios)
-      { path: 'users', Component: /* UsersList */ () => <div>Usuarios / Empleados</div> },
-      { path: 'users/new', Component: /* UserForm */ () => <div>Nuevo Usuario</div> },
-      { path: 'users/:id/edit', Component: /* UserForm */ () => <div>Editar Usuario</div> },
 
       // Configuración del Negocio
       { path: 'settings', Component:  SettingsLayout, 
         children: [
-          // Subrutas para las pestañas de configuración
-          { index: true, element: <Navigate to="general" replace /> },
-          
+          { index: true, element: <Navigate to="general" replace /> },         
           { path: 'general', Component: BusinessSettings },
           { path: 'payment-methods', Component:  PaymentMethodsConfig },
           { path: 'exchange-rates', Component:  ExchangeRatesConfig },  
-           
+          { path: 'users', Component: /* UsersList */ () => <div>Usuarios / Empleados</div> },           
         ]
       },
-
-      //Solo Superadmin
-      { path: 'businesses', Component: /* BusinessesList */ () => <div>Gestión de Empresas (Multi-tenant)</div> },
-      { path: 'roles', Component: /* RolesList */ () => <div>Roles y Permisos</div> },
     ],
   },
   

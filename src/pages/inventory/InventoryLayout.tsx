@@ -1,4 +1,4 @@
-import { Store, Tags, ShoppingCart, ArrowRightLeft } from 'lucide-react';
+import { Store, Tags, ShoppingCart, ArrowRightLeft, Users, Receipt } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TabbedLayout, type NavItem } from '@/components/layout/TabbedLayout';
 
@@ -17,8 +17,13 @@ export default function InventoryLayout() {
       icon: Tags 
     },
     { 
+      path: '/admin/inventory/suppliers', 
+      label: t('inventory.nav.suppliers', 'Proveedores'), 
+      icon: Users
+    },
+    { 
       path: '/admin/inventory/restocks', 
-      label: t('inventory.nav.restocks', 'Compras/Reabastecimiento'), 
+      label: t('inventory.nav.restocks', 'Reabastecimientos'), 
       icon: ShoppingCart 
     },
     { 

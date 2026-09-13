@@ -28,29 +28,36 @@ export function DataTablePagination({
   const endRecord = Math.min(pageIndex * pageSize, total);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between px-2 py-4 gap-4">
-      <div className="text-sm text-muted-foreground">
+    <div className="flex flex-col items-center justify-between gap-4 px-2 py-4 sm:flex-row">
+      {/* Texto de resultados */}
+      <div className="text-center text-sm text-muted-foreground sm:text-left">
         {total > 0 ? (
           <Trans
-            i18nKey="showing_results"
+            i18nKey="datatable.showing_results"
             t={t}
             values={{ start: startRecord, end: endRecord, total }}
-            components={[<span key="dummy" />, <span className="font-medium" key="count" />] as const}
+            components={{
+              strong: <span className="font-medium" />,
+            }}
           />
         ) : (
-          t('no_results')
+          t('datatable.no_results')
         )}
       </div>
 
-      <div className="flex items-center gap-6">
+      {/* Controles de paginación */}
+      <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+        {/* Selector de filas por página */}
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">{t('rows_per_page')}</p>
+          <p className="text-xs font-medium whitespace-nowrap sm:text-sm">
+            {t('datatable.rows_per_page')}
+          </p>
           <Select
             value={`${pageSize}`}
             onValueChange={(value) => onPageSizeChange(Number(value))}
           >
             <SelectTrigger className="h-8 w-[70px]">
-              <SelectValue placeholder={pageSize} />
+              <SelectValue placeholder={`${pageSize}`} />
             </SelectTrigger>
             <SelectContent side="top">
               {[10, 15, 25, 50, 100].map((size) => (
@@ -62,18 +69,20 @@ export function DataTablePagination({
           </Select>
         </div>
 
-        <div className="text-sm font-medium">
-          {t('page_of', { current: pageIndex, total: pageCount || 1 })}
+        {/* Indicador de página */}
+        <div className="text-xs font-medium whitespace-nowrap sm:text-sm">
+          {t('datatable.page_of', { current: pageIndex, total: pageCount || 1 })}
         </div>
 
+        {/* Botones de navegación */}
         <div className="flex items-center space-x-1">
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="hidden h-8 w-8 sm:flex"
             onClick={() => onPageChange(1)}
             disabled={pageIndex <= 1}
-            aria-label={t('first_page')}
+            aria-label={t('datatable.first_page')}
           >
             <ChevronsLeft className="h-4 w-4" />
           </Button>
@@ -83,7 +92,7 @@ export function DataTablePagination({
             className="h-8 w-8"
             onClick={() => onPageChange(pageIndex - 1)}
             disabled={pageIndex <= 1}
-            aria-label={t('previous_page')}
+            aria-label={t('datatable.previous_page')}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -93,17 +102,17 @@ export function DataTablePagination({
             className="h-8 w-8"
             onClick={() => onPageChange(pageIndex + 1)}
             disabled={pageIndex >= pageCount}
-            aria-label={t('next_page')}
+            aria-label={t('datatable.next_page')}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8"
+            className="hidden h-8 w-8 sm:flex"
             onClick={() => onPageChange(pageCount)}
             disabled={pageIndex >= pageCount}
-            aria-label={t('last_page')}
+            aria-label={t('datatable.last_page')}
           >
             <ChevronsRight className="h-4 w-4" />
           </Button>

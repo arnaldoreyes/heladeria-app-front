@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/auth-store';
 import { useLogoutMutation } from '@/pages/auth/hooks/useLogoutMutation';
 import { useThemeStore } from '@/stores/theme-store';
-import { useExchangeRates } from '@/pages/settings/hooks/useExchgeRates';
+import { useActiveExchangeRate } from '@/pages/settings/hooks/useActiveExchangeRate';
 
 const NAV_ITEMS = [
   { href: '/admin/dashboard', labelKey: 'nav.analytics', defaultLabel: 'Analytics', icon: BarChart3, roles: ['superadmin', 'owner'] },
@@ -31,7 +31,7 @@ export function AppLayout() {
   const { user } = useAuthStore();
   const { theme, setTheme } = useThemeStore();
   const { mutate: logout, isPending } = useLogoutMutation();
-  const { currentRate } = useExchangeRates();
+  const { currentRate } = useActiveExchangeRate();
 
   if (!user) {
     return <Navigate to="/auth/login" replace />;
