@@ -21,10 +21,10 @@ export function DataTableColumnHeader({
     <Button
       variant="ghost"
       size="sm"
-      className="-ml-3 h-8 data-[state=open]:bg-accent"
+      className="-ml-3 h-8 data-[state=open]:bg-accent font-medium whitespace-nowrap text-foreground "
       onClick={() => column.toggleSorting(isSorted === 'asc')}
     >
-      <span>{title}</span>
+      <span className='text-left align-middle '>{title}</span>
       {isSorted === 'desc' ? (
         <ArrowDown className="ml-2 h-4 w-4" />
       ) : isSorted === 'asc' ? (

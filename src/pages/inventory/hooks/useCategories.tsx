@@ -13,6 +13,8 @@ import {
   updateCategoryAction,
   deleteCategoryAction,
   bulkDestroyCategoriesAction,
+  bulkUpdateCategoryRulesAction,
+  type BulkUpdateCategoryRulesPayload,
   type GetCategoryFilters,
 } from '../actions/category.actions';
 import type { CategoryApiResponse } from '../interfaces/category.response';
@@ -36,6 +38,9 @@ export function useCategories(filters: GetCategoryFilters = {}) {
   const [editingCategory, setEditingCategory] = useState<CategoryApiResponse | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [bulkDeleteIds, setBulkDeleteIds] = useState<string[]>([]);
+  
+  // Estado para la edición masiva de reglas y categoría padre
+  const [bulkEditRulesIds, setBulkEditRulesIds] = useState<string[]>([]);
 
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'name', desc: false },
@@ -108,6 +113,18 @@ export function useCategories(filters: GetCategoryFilters = {}) {
     },
   });
 
+  // Mutación para edición masiva de reglas de distribución y categoría padre
+  const bulkUpdateRulesMutation = useMutation({
+    mutationFn: (payload: BulkUpdateCategoryRulesPayload) => bulkUpdateCategoryRulesAction(payload),
+    onSuccess: () => {
+      toast.success(t('categories.messages.bulk_rules_success', 'Categorías actualizadas exitosamente'));
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setBulkEditRulesIds([]);
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(error?.message || t('categories.messages.bulk_rules_error', 'Error al actualizar las categorías'));
+    },
+  });
 
   const openModal = (category?: CategoryApiResponse) => {
     if (category) {
@@ -142,6 +159,15 @@ export function useCategories(filters: GetCategoryFilters = {}) {
     if (bulkDeleteIds.length > 0) bulkDeleteMutation.mutate(bulkDeleteIds);
   };
 
+  const handleBulkUpdateRules = (values: Omit<BulkUpdateCategoryRulesPayload, 'ids'>) => {
+    if (bulkEditRulesIds.length > 0) {
+      bulkUpdateRulesMutation.mutate({
+        ids: bulkEditRulesIds,
+        ...values,
+      });
+    }
+  };
+
   const totalRecords = categoriesResponse?.meta?.total ?? 0;
   const pageCount = categoriesResponse?.meta?.last_page ?? Math.ceil(totalRecords / perPage) ?? 1;
 
@@ -167,6 +193,12 @@ export function useCategories(filters: GetCategoryFilters = {}) {
     setBulkDeleteIds,
     confirmBulkDelete,
     isBulkDeleting: bulkDeleteMutation.isPending,
+
+    // Retorno de Edición Masiva
+    bulkEditRulesIds,
+    setBulkEditRulesIds,
+    handleBulkUpdateRules,
+    isBulkUpdatingRules: bulkUpdateRulesMutation.isPending,
 
     sorting,
     setSorting,

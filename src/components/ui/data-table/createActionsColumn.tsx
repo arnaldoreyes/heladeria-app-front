@@ -1,10 +1,11 @@
 import type { ColumnDef } from '@tanstack/react-table';
 import type { ReactNode } from 'react';
+import { Button } from '../button';
 
 export interface RowAction<TData> {
   label: string;
   icon?: ReactNode;
-  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost';
+  variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
   onClick: (row: TData) => void;
   show?: (row: TData) => boolean;
 }
@@ -24,15 +25,16 @@ export function createActionsColumn<TData extends Record<string, any>>(
           {actions
             .filter((action) => (action.show ? action.show(data) : true))
             .map((action, idx) => (
-              <button
+              <Button
                 key={idx}
+                variant={action.variant}
                 type="button"
-                className="p-1 hover:bg-accent rounded-md transition-colors"
+                className=""
                 onClick={() => action.onClick(data)}
                 title={action.label}
               >
                 {action.icon || action.label}
-              </button>
+              </Button>
             ))}
         </div>
       );

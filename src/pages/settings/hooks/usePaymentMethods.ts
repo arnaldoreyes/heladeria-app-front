@@ -21,6 +21,8 @@ import type { ErrorResponse } from '@/types';
 interface FilterParams {
   search?: string;
   currency?: string;
+  is_active?: boolean ;
+  payment_type_id?: string;
 }
 
 const DEFAULT_FORM_VALUES: PaymentMethodFormData = {
@@ -62,7 +64,7 @@ export function usePaymentMethods(filters: FilterParams = {}) {
 
   // --- 3. QUERIES (Lectura de datos) ---
   const { data: methodsResponse, isLoading: isLoadingMethods } = useQuery({
-    queryKey: ['payment-methods', filters.search, filters.currency, sortBy, sortOrder, page, perPage],
+    queryKey: ['payment-methods', filters.search, filters.currency,  filters.payment_type_id,  filters.is_active, sortBy, sortOrder, page, perPage],
     queryFn: () =>
       getPaymentMethodsAction({
         ...filters,

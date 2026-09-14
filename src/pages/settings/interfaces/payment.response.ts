@@ -13,3 +13,9 @@ export interface PaymentMethodApiResponse {
   created_at?: string;
   updated_at?: string;
 }
+
+
+export interface PaymentTypeApiResponse {
+  id?: string;
+  name?: string;
+}

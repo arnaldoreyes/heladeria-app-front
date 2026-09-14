@@ -34,7 +34,7 @@ export function DataTablePagination({
         {total > 0 ? (
           <Trans
             i18nKey="datatable.showing_results"
-            t={t}
+             
             values={{ start: startRecord, end: endRecord, total }}
             components={{
               strong: <span className="font-medium" />,
@@ -60,7 +60,7 @@ export function DataTablePagination({
               <SelectValue placeholder={`${pageSize}`} />
             </SelectTrigger>
             <SelectContent side="top">
-              {[10, 15, 25, 50, 100].map((size) => (
+              {[12, 20, 24, 50, 100].map((size) => (
                 <SelectItem key={size} value={`${size}`}>
                   {size}
                 </SelectItem>

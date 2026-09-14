@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { CategorySelect } from '../CategorySelect';
+import type { CategoryApiResponse } from '../../interfaces/category.response';
 
-import type { CategoryApiResponse } from '../interfaces/category.response';
 
 interface ProductDialogProps {
   isOpen: boolean;
@@ -56,28 +56,14 @@ export function ProductDialog({
               />
               {errors.sku && <p className="text-xs text-destructive">{errors.sku.message}</p>}
             </div>
-
-            <div className="space-y-2">
-              <Label>{t('products.category', 'Categoría')}</Label>
-              <Select
-                value={categoryIdValue || 'none'}
-                onValueChange={(val) =>
-                  setValue('category_id', val === 'none' ? null : val, { shouldValidate: true })
-                }
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t('common.select_placeholder', 'Seleccione...')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">{t('common.no_category', 'Sin Categoría')}</SelectItem>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            
+             <CategorySelect
+                categories={categories}
+                value={categoryIdValue }
+                onChange={(val) => setValue('category_id', val === 'none' ? null : val, { shouldValidate: true })}
+                error={errors.parent_id?.message}
+              />
+            
           </div>
 
           <div className="space-y-2">

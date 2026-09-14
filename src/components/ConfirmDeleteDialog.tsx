@@ -9,7 +9,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { t } from 'i18next';
+import { useTranslation } from 'react-i18next';
+
 
 interface ConfirmDeleteDialogProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ export function ConfirmDeleteDialog({
   description,
 }: ConfirmDeleteDialogProps) {
   const isBulk = count > 1;
+  const { t } = useTranslation();
 
   const defaultTitle = isBulk
     ? t('common.confirm_bulk_delete_title', 'Eliminar registros seleccionados')

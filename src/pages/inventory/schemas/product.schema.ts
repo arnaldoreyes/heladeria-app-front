@@ -25,4 +25,24 @@ export const productSchema = z.object({
   is_active: z.boolean().default(true),
 });
 
+const optionalNumber = z.preprocess(
+  (val) => (val === '' || val === null || val === undefined ? undefined : Number(val)),
+  z.number().min(0, 'El valor no puede ser negativo').optional()
+);
+
+export const bulkUpdateValuesSchema = z.object({
+  price_usd: optionalNumber,
+  cost_usd: optionalNumber,
+  stock: optionalNumber,
+  min_stock_alert: optionalNumber,
+}).refine(
+  (data) =>
+    data.price_usd !== undefined ||
+    data.cost_usd !== undefined ||
+    data.stock !== undefined ||
+    data.min_stock_alert !== undefined,
+  { message: 'Debe ingresar al menos un valor para actualizar masivamente' }
+);
+
+export type BulkUpdateValuesFormData = z.infer<typeof bulkUpdateValuesSchema>;
 export type ProductFormData = z.infer<typeof productSchema>;

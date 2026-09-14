@@ -23,12 +23,12 @@ export function useCategoriesColumns({ onEdit, onDelete }: UseCategoriesColumnsP
 
       {
         accessorKey: 'name',
+        meta: { title: t('categories.name', 'Nombre') },
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t('common.name', 'Nombre')} />
+          <DataTableColumnHeader column={column} title={t('categories.name', 'Nombre') } />
         ),
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
-            <FolderTree className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <span className="font-medium">{row.original.name}</span>
           </div>
         ),
@@ -37,9 +37,9 @@ export function useCategoriesColumns({ onEdit, onDelete }: UseCategoriesColumnsP
       {
         id: 'parent',
         accessorKey: 'parent.name',
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t('categories.parent', 'Categoría Padre')} />
-        ),
+        enableSorting: false,
+        meta: { title: t('categories.parent', 'Categoría Padre')},
+        header: t('categories.parent', 'Categoría Padre'),
         cell: ({ row }) => {
           const parentName = row.original.parent?.name;
           return (
@@ -52,6 +52,7 @@ export function useCategoriesColumns({ onEdit, onDelete }: UseCategoriesColumnsP
 
       {
         accessorKey: 'profit_percentage',
+        meta: { title: t('categories.profit', '% Ganancia')},
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('categories.profit', '% Ganancia')} />
         ),
@@ -63,6 +64,7 @@ export function useCategoriesColumns({ onEdit, onDelete }: UseCategoriesColumnsP
 
       {
         accessorKey: 'reinvestment_percentage',
+        meta: { title: t('categories.reinvestment', '% Reinversión') },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('categories.reinvestment', '% Reinversión')} />
         ),

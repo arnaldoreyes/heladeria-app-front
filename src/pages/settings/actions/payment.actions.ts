@@ -8,7 +8,7 @@ export interface GetFilters {
   search?: string;
   currency?: string;
   page?: number;
-  perPage?: number;
+  per_page?: number;
   limit?: number; 
   sort_by?: string;
   sort_order?: 'asc' | 'desc';

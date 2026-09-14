@@ -1,25 +1,29 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
-import { Trash2, CheckCircle, XCircle, Plus } from 'lucide-react';
+import { Trash2, CheckCircle, XCircle, Plus, Edit3 } from 'lucide-react';
 
 import { DataTable } from '@/components/ui/data-table/DataTable';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { useProducts } from './hooks/useProducts';
 import { useProductsColumns } from './hooks/useProductsColumns';
-import { ProductDialog } from './components/ProductDialog';
-import { ProductGridCard } from './components/ProductGridCard';
+import { ProductDialog } from './components/products/ProductDialog';
+import { ProductGridCard } from './components/products/ProductGridCard';
+import { ProductFilters } from './components/products/ProductFilters';
 import { useActiveExchangeRate } from '../settings/hooks/useActiveExchangeRate';
+import { BulkUpdateValuesDialog } from './components/products/BulkUpdateProductValuesDialog';
 
 export default function ProductsList() {
   const { t } = useTranslation(['products', 'common']);
 
+  // Estados de Filtros
   const [searchValue, setSearchValue] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('ALL');
+  const [activeFilter, setActiveFilter] = useState('ALL');
+  const [stockFilter, setStockFilter] = useState('ALL');
+
   const [debouncedSearch] = useDebounce(searchValue, 500);
   const { currentRate } = useActiveExchangeRate();
-
 
   const {
     products,
@@ -32,54 +36,83 @@ export default function ProductsList() {
     onSubmit,
     isSaving,
     isEditing,
-
     deletingId,
     setDeletingId,
     confirmDelete,
     isDeleting,
-
     bulkDeleteIds,
     setBulkDeleteIds,
     confirmBulkDelete,
     isBulkDeleting,
-
     sorting,
     setSorting,
     handleBulkStatus,
-
     page,
     setPage,
     perPage,
     setPerPage,
     pageCount,
     totalRecords,
+    bulkEditIds,
+    setBulkEditIds,
+    handleBulkUpdateValues,
+    isBulkUpdatingValues,
   } = useProducts({
     search: debouncedSearch,
     category_id: categoryFilter !== 'ALL' ? categoryFilter : undefined,
+    is_active: activeFilter !== 'ALL' ? activeFilter === 'active' : undefined,
+    with_stock: stockFilter !== 'ALL' ? stockFilter === 'true' : undefined,
   });
+
+  const handleResetFilters = useCallback(() => {
+    setSearchValue('');
+    setStockFilter('ALL');
+    setActiveFilter('ALL');
+    setCategoryFilter('ALL');
+  }, []);
 
   const columns = useProductsColumns({
     onEdit: openModal,
-    onDelete: (id) => setDeletingId(id),
+    onDelete: setDeletingId,
   });
 
-  const filterComponents = (
-    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-      <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder={t('products.category', 'Categoría')} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="ALL">{t('common.all_categories', 'Todas las Categorías')}</SelectItem>
-        {categories.map((cat) => (
-          <SelectItem key={cat.id} value={cat.id}>
-            {cat.name}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+  const getRealIds = useCallback(
+    (selectedRows: any[]) => selectedRows.map((row) => row.id || row.original?.id),
+    []
   );
 
-  const getRealIds = (selectedRows: any[]) => selectedRows.map((row) => row.id || row.original?.id);
+  const bulkActions = useMemo(
+    () => [
+      {
+        label: t('common.bulk_activate', 'Activar Seleccionados'),
+        icon: <CheckCircle className="h-4 w-4" />,
+        onClick: (rows: any[]) => handleBulkStatus(getRealIds(rows), true),
+      },
+      {
+        label: t('common.bulk_deactivate', 'Desactivar Seleccionados'),
+        icon: <XCircle className="h-4 w-4" />,
+        onClick: (rows: any[]) => handleBulkStatus(getRealIds(rows), false),
+      },
+      {
+        label: t('common.bulk_edit_values', 'Editar Valores Masivamente'),
+        icon: <Edit3 className="h-4 w-4" />,
+        onClick: (rows: any[]) => setBulkEditIds(getRealIds(rows)),
+      },
+      {
+        label: t('common.bulk_delete', 'Eliminar Masivo'),
+        icon: <Trash2 className="h-4 w-4" />,
+        variant: 'destructive' as const,
+        onClick: (rows: any[]) => setBulkDeleteIds(getRealIds(rows)),
+      },
+    ],
+    [getRealIds, handleBulkStatus, setBulkDeleteIds, setBulkEditIds, t]
+  );
+
+  const isResetDisabled =
+    searchValue === '' &&
+    activeFilter === 'ALL' &&
+    stockFilter === 'ALL' &&
+    categoryFilter === 'ALL';
 
   return (
     <div className="space-y-4">
@@ -96,42 +129,36 @@ export default function ProductsList() {
         onAdd={() => openModal()}
         addLabel={t('products.add_button', 'Nuevo Producto')}
         addIcon={<Plus className="mr-2 h-4 w-4" />}
-        filterComponents={filterComponents}
+        filterComponents={
+          <ProductFilters
+            categoryFilter={categoryFilter}
+            onCategoryChange={(v) => v && setCategoryFilter(v)}
+            activeFilter={activeFilter}
+            onActiveChange={(v) => v && setActiveFilter(v)}
+            stockFilter={stockFilter}
+            onStockChange={(v) => v && setStockFilter(v)}
+            categories={categories}
+            onReset={handleResetFilters}
+            isResetDisabled={isResetDisabled}
+          />
+        }
         sorting={sorting}
         onSortingChange={setSorting}
-        onBulkActions={[
-          {
-            label: t('common.bulk_activate', 'Activar Seleccionados'),
-            icon: <CheckCircle className="h-4 w-4" />,
-            onClick: (selectedRows) => handleBulkStatus(getRealIds(selectedRows), true),
-          },
-          {
-            label: t('common.bulk_deactivate', 'Desactivar Seleccionados'),
-            icon: <XCircle className="h-4 w-4" />,
-            onClick: (selectedRows) => handleBulkStatus(getRealIds(selectedRows), false),
-          },
-          {
-            label: t('common.bulk_delete', 'Eliminar Masivo'),
-            icon: <Trash2 className="h-4 w-4" />,
-            variant: 'destructive',
-            onClick: (selectedRows) => setBulkDeleteIds(getRealIds(selectedRows)),
-          },
-        ]}
+        onBulkActions={bulkActions}
         defaultViewMode="grid"
         renderGridCard={(row) => (
           <ProductGridCard
             row={row}
             onEdit={openModal}
-            onDelete={(id) => setDeletingId(id)}
-            exchangeRate={currentRate?.rate }
+            onDelete={setDeletingId}
+            exchangeRate={currentRate?.rate}
           />
         )}
-        /* Props de Paginación */
         pagination={{
           pageIndex: page,
           pageSize: perPage,
-          pageCount: pageCount,
-          total: totalRecords, // o total: totalRecords según la interfaz de tu DataTablePagination
+          pageCount,
+          total: totalRecords,
         }}
         onPageChange={setPage}
         onPageSizeChange={(newPerPage) => {
@@ -155,7 +182,6 @@ export default function ProductsList() {
         onClose={() => setDeletingId(null)}
         onConfirm={confirmDelete}
         isDeleting={isDeleting}
-        t={t}
       />
 
       <ConfirmDeleteDialog
@@ -164,7 +190,14 @@ export default function ProductsList() {
         onConfirm={confirmBulkDelete}
         isDeleting={isBulkDeleting}
         count={bulkDeleteIds.length}
-        t={t}
+      />
+
+      <BulkUpdateValuesDialog
+        isOpen={bulkEditIds.length > 0}
+        onClose={() => setBulkEditIds([])}
+        onSubmit={handleBulkUpdateValues}
+        isSaving={isBulkUpdatingValues}
+        selectedCount={bulkEditIds.length}
       />
     </div>
   );

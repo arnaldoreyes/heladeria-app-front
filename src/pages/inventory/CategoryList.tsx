@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2, Edit3 } from 'lucide-react';
 
 import { DataTable } from '@/components/ui/data-table/DataTable';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { useCategories } from './hooks/useCategories';
 import { useCategoriesColumns } from './hooks/useCategoriesColumns';
-import { CategoryDialog } from './components/CategoryDialog';
-import { CategoryGridCard } from './components/CategoryGridCard';
+import { CategoryDialog } from './components/categories/CategoryDialog';
+import { BulkUpdateCategoryRulesDialog } from './components/categories/BulkUpdateCategoryRulesDialog';
 
 export default function CategoriesList() {
   const { t } = useTranslation(['categories', 'common']);
@@ -36,6 +36,11 @@ export default function CategoriesList() {
     setBulkDeleteIds,
     confirmBulkDelete,
     isBulkDeleting,
+
+    bulkEditRulesIds,
+    setBulkEditRulesIds,
+    handleBulkUpdateRules,
+    isBulkUpdatingRules,
 
     sorting,
     setSorting,
@@ -70,10 +75,14 @@ export default function CategoriesList() {
         searchPlaceholder={t('categories.search_placeholder', 'Buscar categorías...')}
         onAdd={() => openModal()}
         addLabel={t('categories.add_button', 'Nueva Categoría')}
-        addIcon={<Plus className="mr-2 h-4 w-4" />}
         sorting={sorting}
         onSortingChange={setSorting}
         onBulkActions={[
+          {
+            label: t('common.bulk_edit_values', 'Editar Valores Masivamente'),
+            icon: <Edit3 className="h-4 w-4" />,
+            onClick: (rows: any[]) => setBulkEditRulesIds(getRealIds(rows)),
+          },
           {
             label: t('common.bulk_delete', 'Eliminar Masivo'),
             icon: <Trash2 className="h-4 w-4" />,
@@ -81,19 +90,11 @@ export default function CategoriesList() {
             onClick: (selectedRows) => setBulkDeleteIds(getRealIds(selectedRows)),
           },
         ]}
-          renderGridCard={(row) => (
-            <CategoryGridCard
-              row={row}
-              onEdit={openModal}
-              onDelete={(id) => setDeletingId(id)}
-            />
-          )}
-          /* Props de Paginación */
         pagination={{
           pageIndex: page,
           pageSize: perPage,
           pageCount: pageCount,
-          total: totalRecords, // o total: totalRecords según la interfaz de tu DataTablePagination
+          total: totalRecords,
         }}
         onPageChange={setPage}
         onPageSizeChange={(newPerPage) => {
@@ -112,12 +113,20 @@ export default function CategoriesList() {
         parentCategories={categories}
       />
 
+      <BulkUpdateCategoryRulesDialog
+        isOpen={bulkEditRulesIds.length > 0}
+        onClose={() => setBulkEditRulesIds([])}
+        onSubmit={handleBulkUpdateRules}
+        isSaving={isBulkUpdatingRules}
+        selectedCount={bulkEditRulesIds.length}
+        parentCategories={categories}
+      />
+
       <ConfirmDeleteDialog
         isOpen={!!deletingId}
         onClose={() => setDeletingId(null)}
         onConfirm={confirmDelete}
         isDeleting={isDeleting}
-        t={t}
       />
 
       <ConfirmDeleteDialog
@@ -126,7 +135,6 @@ export default function CategoriesList() {
         onConfirm={confirmBulkDelete}
         isDeleting={isBulkDeleting}
         count={bulkDeleteIds.length}
-        t={t}
       />
     </div>
   );

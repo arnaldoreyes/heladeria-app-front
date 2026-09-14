@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { 
   Search, Plus, Filter, LayoutGrid, Table as TableIcon, 
-  CheckSquare, ArrowUpDown, ArrowUp, ArrowDown 
+  CheckSquare, ArrowUpDown, ArrowUp, ArrowDown, Check, RotateCcw 
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+  DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
@@ -50,7 +53,7 @@ export function DataTableToolbar<TData extends Record<string, any>>({
   showAdd = false,
   onAdd,
   addLabel,
-  addIcon = <Plus className="mr-2 h-4 w-4" />,
+  addIcon = <Plus className="h-4 w-4" />,
   showFilters = false,
   filterComponents,
   viewMode = 'table',
@@ -61,18 +64,18 @@ export function DataTableToolbar<TData extends Record<string, any>>({
 }: DataTableToolbarProps<TData>) {
   const { t } = useTranslation(['datatable', 'common']);
 
-  // En v9, filtramos columnas que permiten ordenamiento
   const sortableColumns = table 
-    ? table.getAllLeafColumns().filter((col:any) => col.getCanSort?.() ?? false) 
+    ? table.getAllLeafColumns().filter((col: any) => col.getCanSort?.() ?? false) 
     : [];
 
-  // Helper para obtener el título legible de la columna
+  const sortedColumn = sortableColumns.find((col: any) => col.getIsSorted());
+  const currentSortDirection = sortedColumn ? sortedColumn.getIsSorted() : null;
+
   const getColumnTitle = (column: any): string => {
     const metaTitle = (column.columnDef.meta as any)?.title || (column.columnDef.meta as any)?.label;
     if (metaTitle) return metaTitle;
     if (typeof column.columnDef.header === 'string') return column.columnDef.header;
     
-    // Capitalizar ID de la columna como fallback limpio (ej: "price_usd" -> "Price Usd")
     return column.id.replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase());
   };
 
@@ -95,52 +98,111 @@ export function DataTableToolbar<TData extends Record<string, any>>({
 
       {/* Acciones principales */}
       <div className="flex items-center space-x-2">
-        
-        {/* Controles móviles / Vista Grid */}
-        <div className={cn("flex items-center space-x-2", viewMode === 'table' ? "md:hidden" : "")}>
-          {onToggleSelectAll && (
-            <Button
-              variant={isAllSelected ? "default" : "outline"}
-              size="icon"
-              className="h-9 w-9"
-              onClick={onToggleSelectAll}
-            >
-              <CheckSquare className="h-4 w-4" />
-            </Button>
-          )}
+        {onToggleSelectAll && (
+          <Button
+            variant={isAllSelected ? "default" : "outline"}
+            size="icon"
+            className={cn("flex items-center h-9 w-9", viewMode === 'table' ? "md:hidden" : "")}
+            onClick={onToggleSelectAll}
+          >
+            <CheckSquare className="h-4 w-4" />
+          </Button>
+        )}
 
-          {/* Menú desplegable para Ordenamiento dinámico en v9 */}
-          {sortableColumns.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Button variant="outline" size="icon" className="h-9 w-9">
-                  <ArrowUpDown className="h-4 w-4" />
+        {/* Menú desplegable para Ordenamiento */}
+        {sortableColumns.length > 0 && (
+          <div className={cn("flex items-center", viewMode === 'table' ? "md:hidden" : "")}>
+            <DropdownMenu> 
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant={sortedColumn ? "secondary" : "outline"} 
+                  size="sm" 
+                  className="h-9 gap-1.5 px-2.5 text-xs font-medium cursor-pointer"
+                >
+                  {currentSortDirection === 'asc' ? (
+                    <ArrowUp className="h-4 w-4 text-primary" />
+                  ) : currentSortDirection === 'desc' ? (
+                    <ArrowDown className="h-4 w-4 text-primary" />
+                  ) : (
+                    <ArrowUpDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <span className="hidden sm:inline">
+                    {sortedColumn ? getColumnTitle(sortedColumn) : t('datatable.sort', 'Ordenar')}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {sortableColumns.map((column:any) => {
-                  const isSorted = column.getIsSorted();
-                  return (
-                    <DropdownMenuItem
-                      key={column.id}
-                      onClick={() => column.toggleSorting(isSorted === 'asc')}
-                      className="flex items-center justify-between min-w-[160px]"
-                    >
-                      <span>{getColumnTitle(column)}</span>
-                      {isSorted === 'desc' ? (
-                        <ArrowDown className="ml-2 h-4 w-4 text-primary" />
-                      ) : isSorted === 'asc' ? (
-                        <ArrowUp className="ml-2 h-4 w-4 text-primary" />
-                      ) : null}
-                    </DropdownMenuItem>
-                  );
-                })}
+              <DropdownMenuContent align="end" className="w-56 p-1 z-50">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="text-xs text-muted-foreground font-normal px-2 py-1.5">
+                    {t('datatable.sortBy', 'Ordenar por')}
+                  </DropdownMenuLabel>
+                  
+                  <DropdownMenuSeparator />
+
+                  {sortableColumns.map((column: any) => {
+                    const isSorted = column.getIsSorted();
+                    const isActive = !!isSorted;
+
+                    return (
+                      <DropdownMenuItem
+                        key={column.id}
+                        onClick={() => {
+                          if (isSorted === 'asc') {
+                            column.toggleSorting(true); // Cambia a DESC
+                          } else if (isSorted === 'desc') {
+                            column.clearSorting(); // Al hacer clic en DESC, resetea la columna
+                          } else {
+                            column.toggleSorting(false); // Inicia en ASC
+                          }
+                        }}
+                        className="flex items-center justify-between cursor-pointer text-xs py-2 px-2 rounded-md"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Check 
+                            className={cn(
+                              "h-4 w-4 text-primary transition-opacity",
+                              isActive ? "opacity-100" : "opacity-0"
+                            )} 
+                          />
+                          <span className={cn(isActive && "font-bold text-primary")}>
+                            {getColumnTitle(column)}
+                          </span>
+                        </div>
+
+                        {isSorted === 'desc' && (
+                          <span className="flex items-center gap-1 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-mono font-bold">
+                            DESC <ArrowDown className="h-3 w-3" />
+                          </span>
+                        )}
+                        {isSorted === 'asc' && (
+                          <span className="flex items-center gap-1 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-mono font-bold">
+                            ASC <ArrowUp className="h-3 w-3" />
+                          </span>
+                        )}
+                      </DropdownMenuItem>
+                    );
+                  })}
+
+                  {/* Botón para resetear todo el ordenamiento si hay algo ordenado */}
+                  {sortedColumn && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => table?.resetSorting()}
+                        className="flex items-center justify-center gap-2 cursor-pointer text-xs py-2 text-muted-foreground hover:text-foreground font-medium"
+                      >
+                        <RotateCcw className="h-3.5 w-3.5" />
+                        <span>{t('datatable.resetSort', 'Restablecer orden')}</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
-          )}
-        </div>
+          </div>
+        )}
 
-        {/* Alternate de vistas (Desktop) */}
+        {/* Alternar vistas (Desktop) */}
         {onViewModeChange && (
           <Button
             variant="outline"
@@ -152,13 +214,13 @@ export function DataTableToolbar<TData extends Record<string, any>>({
           </Button>
         )}
 
-        {/* Filtros ligeros en Popover (no bloquea pantalla con Dialog) */}
+        {/* Filtros */}
         {showFilters && filterComponents && (
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="h-9">
-                <Filter className="mr-2 h-4 w-4" />
-                <span className='d-none md:d-block'>{t('common.filters', 'Filtros')}</span>
+                <Filter className="h-4 w-4" />
+                <span className="hidden lg:block">{t('common.filters', 'Filtros')}</span>
               </Button>
             </PopoverTrigger>
             <PopoverContent 
@@ -167,7 +229,7 @@ export function DataTableToolbar<TData extends Record<string, any>>({
               collisionPadding={16}
               className="w-[calc(100vw-32px)] sm:w-80 p-4 space-y-3"
             >
-              <div className="hidden lg:block">
+              <div className="hidden lg:block font-semibold">
                 {t('common.filters', 'Filtros')}
               </div>
               <div className="space-y-3">
@@ -178,10 +240,10 @@ export function DataTableToolbar<TData extends Record<string, any>>({
         )}
 
         {/* Botón Agregar */}
-        {showAdd && onAdd && (
-          <Button onClick={onAdd} variant="default" size="sm" className="h-9">
+        {showAdd && onAdd && (  
+          <Button onClick={onAdd} variant="default" size="sm" className="h-9 flex items-center justify-center">
             {addIcon}
-            <span className="hidden lg:block">
+            <span className="hidden lg:block ml-1.5">
               {addLabel || t('common.add', 'Agregar')}
             </span>
           </Button>

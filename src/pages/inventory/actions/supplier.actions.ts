@@ -43,3 +43,7 @@ export const deleteSupplierAction = async (id: string): Promise<void> => {
 export const bulkDestroySuppliersAction = async (ids: string[]): Promise<void> => {
   await iceApi.post('/suppliers/bulk-destroy', { ids });
 };
+
+export const bulkUpdateStatusSuppliersAction = async (ids: string[], is_active: boolean = true): Promise<void> => {
+  await iceApi.post('/suppliers/bulk-status-update', { ids, is_active });
+};

@@ -24,6 +24,7 @@ export function usePaymentMethodsColumns({ onEdit, onDelete }: UsePaymentColumns
       // Columna: Nombre
       {
         accessorKey: 'name',
+        meta: { title: t('common.name', 'Nombre') },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('common.name', 'Nombre')} />
         ),
@@ -32,26 +33,10 @@ export function usePaymentMethodsColumns({ onEdit, onDelete }: UsePaymentColumns
         ),
       },
 
-      // Columna: Tipo de Pago (Agregada como columna dedicada)
-      {
-        id: 'type',
-        accessorKey: 'type.name',
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t('settings.payments.type', 'Tipo de Pago')} />
-        ),
-        cell: ({ row }) => {
-          const typeName = row.original.type?.name;
-          return (
-            <Badge variant="outline" className="font-normal">
-              {typeName || t('common.n_a', 'N/A')}
-            </Badge>
-          );
-        },
-      },
-
       // Columna: Moneda
       {
         accessorKey: 'currency',
+        meta: { title: t('common.currency', 'Moneda') },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('common.currency', 'Moneda')} />
         ),
@@ -62,10 +47,27 @@ export function usePaymentMethodsColumns({ onEdit, onDelete }: UsePaymentColumns
         ),
       },
 
+      // Columna: Tipo de Pago (Agregada como columna dedicada)
+      {
+        id: 'type.name',
+        accessorKey: 'type.name',
+        meta: { title: t('settings.payments.type', 'Tipo de Pago') },
+        header: t('settings.payments.type', 'Tipo de Pago'),
+        cell: ({ row }) => {
+          const typeName = row.original.type?.name;
+          return (
+            <Badge variant="outline" className="font-normal">
+              {typeName || t('common.n_a', 'N/A')}
+            </Badge>
+          );
+        },
+      },
+
       // Columna: Estado
       {
         accessorKey: 'is_active',
         header: t('common.status', 'Estado'),
+        meta: { title: t('common.status', 'Estado')},
         enableSorting: false,
         cell: ({ row }) => (
           <Badge variant={row.original.is_active ? 'outline' : 'destructive'}>

@@ -8,10 +8,17 @@ export interface GetCategoryFilters {
   parent_id?: string;
   root_only?: boolean;
   page?: number;
-  perPage?: number;
+  per_page?: number;
   limit?: number;
   sort_by?: string;
   sort_order?: 'asc' | 'desc';
+}
+
+export interface BulkUpdateCategoryRulesPayload {
+  ids: string[];
+  parent_id?: string | null;
+  profit_percentage?: number;
+  reinvestment_percentage?: number;
 }
 
 export const getCategoriesAction = async (filters: GetCategoryFilters = {}): Promise<PaginatedCategoriesResponse> => {
@@ -42,4 +49,8 @@ export const deleteCategoryAction = async (id: string): Promise<void> => {
 
 export const bulkDestroyCategoriesAction = async (ids: string[]): Promise<void> => {
   await iceApi.post('/categories/bulk-destroy', { ids });
+};
+
+export const bulkUpdateCategoryRulesAction = async (payload: BulkUpdateCategoryRulesPayload): Promise<void> => {
+  await iceApi.post('/categories/bulk-update-rules', payload);
 };

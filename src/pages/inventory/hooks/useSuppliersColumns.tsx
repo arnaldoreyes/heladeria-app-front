@@ -23,12 +23,12 @@ export function useSuppliersColumns({ onEdit, onDelete }: UseSuppliersColumnsPro
 
       {
         accessorKey: 'name',
+        meta: { title: t('suppliers.name', 'Proveedor / Razón Social')},
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t('common.name', 'Proveedor / Razón Social')} />
+          <DataTableColumnHeader column={column} title={t('suppliers.name', 'Proveedor / Razón Social')} />
         ),
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
-            <Truck className="h-4 w-4 text-muted-foreground flex-shrink-0" />
             <div className="flex flex-col">
               <span className="font-medium">{row.original.name}</span>
               {row.original.contact_name && (
@@ -41,6 +41,8 @@ export function useSuppliersColumns({ onEdit, onDelete }: UseSuppliersColumnsPro
 
       {
         accessorKey: 'tax_id',
+        meta: { title: t('suppliers.tax_id', 'Documento Fiscal') },
+        enableSorting: false,
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('suppliers.tax_id', 'Documento Fiscal')} />
         ),
@@ -57,8 +59,10 @@ export function useSuppliersColumns({ onEdit, onDelete }: UseSuppliersColumnsPro
 
       {
         accessorKey: 'phone',
+        meta: { title: t('suppliers.contact', 'Contacto') },
+        enableSorting: false,
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t('common.contact', 'Contacto')} />
+          <DataTableColumnHeader column={column} title={t('suppliers.contact', 'Contacto')} />
         ),
         cell: ({ row }) => {
           const { phone, email } = row.original;
@@ -66,7 +70,6 @@ export function useSuppliersColumns({ onEdit, onDelete }: UseSuppliersColumnsPro
             <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
               {phone && (
                 <div className="flex items-center gap-1">
-                  <Phone className="h-3 w-3" />
                   <span>{phone}</span>
                 </div>
               )}
@@ -84,8 +87,10 @@ export function useSuppliersColumns({ onEdit, onDelete }: UseSuppliersColumnsPro
 
       {
         accessorKey: 'is_active',
+        meta: { title: t('suppliers.status', 'Estado') },
+        enableSorting: false,
         header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t('common.status', 'Estado')} />
+          <DataTableColumnHeader column={column} title={t('suppliers.status', 'Estado')} />
         ),
         cell: ({ row }) => (
           <Badge variant={row.original.is_active ? 'default' : 'secondary'}>

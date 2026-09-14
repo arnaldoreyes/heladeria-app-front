@@ -1,52 +1,50 @@
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
-import { Trash2, CheckCircle, XCircle, Plus } from 'lucide-react';
+import { Trash2, CheckCircle, XCircle } from 'lucide-react';
 
 import { DataTable } from '@/components/ui/data-table/DataTable';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PaymentMethodDialog } from './components/PaymentMethodDialog';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { PaymentMethodGridCard } from './components/PaymentMethodGridCard';
+import { PaymentMethodFilters } from './components/PaymentMethodFilters';
 
 import { usePaymentMethods } from './hooks/usePaymentMethods';
 import { usePaymentMethodsColumns } from './hooks/usePaymentMethodsColumns';
-import { PaymentMethodGridCard } from './components/PaymentMethodGridCard';
 
 export default function PaymentMethodsConfig() {
   const { t } = useTranslation(['settings', 'common']);
-  
+
+  // Estados de Filtros
   const [searchValue, setSearchValue] = useState('');
   const [currencyFilter, setCurrencyFilter] = useState('ALL');
+  const [activeFilter, setActiveFilter] = useState('ALL');
+  const [paymentTypeFilter, setPaymentTypeFilter] = useState('ALL');
+
   const [debouncedSearch] = useDebounce(searchValue, 500);
 
-  const { 
-    methods, 
+  const {
+    methods,
     paymentTypes,
-    isLoadingMethods, 
+    isLoadingMethods,
     isModalOpen,
     closeModal,
-    openModal, 
+    openModal,
     form,
     onSubmit,
     isSaving,
     isEditing,
-    
-    // Eliminación individual
     deletingId,
     setDeletingId,
     confirmDelete,
     isDeleting,
-
-    // Eliminación masiva
     bulkDeleteIds,
     setBulkDeleteIds,
     confirmBulkDelete,
     isBulkDeleting,
-
-    sorting, 
+    sorting,
     setSorting,
     handleBulkStatus,
-    
     page,
     setPage,
     perPage,
@@ -55,29 +53,55 @@ export default function PaymentMethodsConfig() {
     totalRecords,
   } = usePaymentMethods({
     search: debouncedSearch,
-    currency: currencyFilter !== 'ALL' ? currencyFilter : undefined
+    currency: currencyFilter !== 'ALL' ? currencyFilter : undefined,
+    is_active: activeFilter !== 'ALL' ? activeFilter === 'active' : undefined,
+    payment_type_id: paymentTypeFilter !== 'ALL' ? paymentTypeFilter : undefined,
   });
 
-  // Pasamos los callbacks reales del hook a las columnas
   const columns = usePaymentMethodsColumns({
     onEdit: openModal,
-    onDelete: (id) => setDeletingId(id), 
+    onDelete: (id) => setDeletingId(id),
   });
 
-  const filterComponents = (
-    <Select value={currencyFilter} onValueChange={setCurrencyFilter}>
-      <SelectTrigger className="w-[140px]">
-        <SelectValue placeholder={t('settings.payments.currency', 'Moneda')} />
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value="ALL">{t('common.all', 'Todas')}</SelectItem>
-        <SelectItem value="USD">USD</SelectItem>
-        <SelectItem value="VES">VES</SelectItem>
-      </SelectContent>
-    </Select>
+  const handleResetFilters = useCallback(() => {
+    setSearchValue('');
+    setCurrencyFilter('ALL');
+    setActiveFilter('ALL');
+    setPaymentTypeFilter('ALL');
+  }, []);
+
+  const getRealIds = useCallback(
+    (selectedRows: any[]) => selectedRows.map((row) => row.id || row.original?.id),
+    []
   );
 
-  const getRealIds = (selectedRows: any[]) => selectedRows.map(row => row.id || row.original?.id);
+  const bulkActions = useMemo(
+    () => [
+      {
+        label: t('settings.payments.bulk_activate', 'Activar Seleccionados'),
+        icon: <CheckCircle className="h-4 w-4" />,
+        onClick: (selectedRows: any[]) => handleBulkStatus(getRealIds(selectedRows), true),
+      },
+      {
+        label: t('settings.payments.bulk_deactivate', 'Desactivar Seleccionados'),
+        icon: <XCircle className="h-4 w-4" />,
+        onClick: (selectedRows: any[]) => handleBulkStatus(getRealIds(selectedRows), false),
+      },
+      {
+        label: t('settings.payments.bulk_delete', 'Eliminar Masivo'),
+        icon: <Trash2 className="h-4 w-4" />,
+        variant: 'destructive' as const,
+        onClick: (selectedRows: any[]) => setBulkDeleteIds(getRealIds(selectedRows)),
+      },
+    ],
+    [getRealIds, handleBulkStatus, setBulkDeleteIds, t]
+  );
+
+  const isResetDisabled =
+    searchValue === '' &&
+    currencyFilter === 'ALL' &&
+    activeFilter === 'ALL' &&
+    paymentTypeFilter === 'ALL';
 
   return (
     <div className="space-y-4">
@@ -85,42 +109,30 @@ export default function PaymentMethodsConfig() {
         data={methods}
         columns={columns}
         isLoading={isLoadingMethods}
-        
         showSearch={true}
         showAdd={true}
         showFilters={true}
-
         searchValue={searchValue}
         onSearchChange={setSearchValue}
         searchPlaceholder={t('settings.payments.search', 'Buscar métodos...')}
-        
         onAdd={() => openModal()}
         addLabel={t('settings.payments.add', 'Nuevo Método')}
-        addIcon={<Plus className="mr-2 h-4 w-4" />} 
-
-        filterComponents={filterComponents}
+        filterComponents={
+          <PaymentMethodFilters
+            currencyFilter={currencyFilter}
+            onCurrencyChange={setCurrencyFilter}
+            activeFilter={activeFilter}
+            onActiveChange={setActiveFilter}
+            paymentTypeFilter={paymentTypeFilter}
+            onPaymentTypeChange={setPaymentTypeFilter}
+            paymentTypes={paymentTypes}
+            onReset={handleResetFilters}
+            isResetDisabled={isResetDisabled}
+          />
+        }
         sorting={sorting}
         onSortingChange={setSorting}
-
-        onBulkActions={[
-          {
-            label: t('settings.payments.bulk_activate', 'Activar Seleccionados'),
-            icon: <CheckCircle className="h-4 w-4" />,
-            onClick: (selectedRows) => handleBulkStatus(getRealIds(selectedRows), true),
-          },
-          {
-            label: t('settings.payments.bulk_deactivate', 'Desactivar Seleccionados'),
-            icon: <XCircle className="h-4 w-4" />,
-            onClick: (selectedRows) => handleBulkStatus(getRealIds(selectedRows), false),
-          },
-          {
-            label: t('settings.payments.bulk_delete', 'Eliminar Masivo'),
-            icon: <Trash2 className="h-4 w-4" />,
-            variant: 'destructive', 
-            onClick: (selectedRows) => setBulkDeleteIds(getRealIds(selectedRows)),
-          },
-        ]}
-        defaultViewMode="grid"
+        onBulkActions={bulkActions}
         renderGridCard={(row) => (
           <PaymentMethodGridCard
             row={row}
@@ -132,7 +144,7 @@ export default function PaymentMethodsConfig() {
           pageIndex: page,
           pageSize: perPage,
           pageCount: pageCount,
-          total: totalRecords, // o total: totalRecords según la interfaz de tu DataTablePagination
+          total: totalRecords,
         }}
         onPageChange={setPage}
         onPageSizeChange={(newPerPage) => {
@@ -141,7 +153,6 @@ export default function PaymentMethodsConfig() {
         }}
       />
 
-      {/* --- MODAL CREAR / EDITAR --- */}
       <PaymentMethodDialog
         isOpen={isModalOpen}
         onOpenChange={(open) => !open && closeModal()}
@@ -152,23 +163,19 @@ export default function PaymentMethodsConfig() {
         paymentTypes={paymentTypes}
       />
 
-      {/* --- DIÁLOGO ELIMINACIÓN INDIVIDUAL --- */}
       <ConfirmDeleteDialog
         isOpen={!!deletingId}
         onClose={() => setDeletingId(null)}
         onConfirm={confirmDelete}
         isDeleting={isDeleting}
-        t={t}
       />
 
-      {/* --- DIÁLOGO ELIMINACIÓN MASIVA --- */}
       <ConfirmDeleteDialog
         isOpen={bulkDeleteIds.length > 0}
         onClose={() => setBulkDeleteIds([])}
         onConfirm={confirmBulkDelete}
         isDeleting={isBulkDeleting}
         count={bulkDeleteIds.length}
-        t={t}
       />
     </div>
   );

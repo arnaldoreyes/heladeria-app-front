@@ -1,19 +1,20 @@
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDebounce } from 'use-debounce';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2, CheckCircle, XCircle } from 'lucide-react';
 
 import { DataTable } from '@/components/ui/data-table/DataTable';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { useSuppliers } from './hooks/useSuppliers';
 import { useSuppliersColumns } from './hooks/useSuppliersColumns';
-import { SupplierDialog } from './components/SupplierDialog';
-import { SupplierGridCard } from './components/SupplierGridCard';
+import { SupplierDialog } from './components/suppliers/SupplierDialog';
+import { SupplierFilters } from './components/suppliers/SupplierFilters';
 
 export default function SuppliersList() {
   const { t } = useTranslation(['suppliers', 'common']);
 
   const [searchValue, setSearchValue] = useState('');
+  const [activeFilter, setActiveFilter] = useState('ALL');
   const [debouncedSearch] = useDebounce(searchValue, 500);
 
   const {
@@ -36,6 +37,7 @@ export default function SuppliersList() {
     setBulkDeleteIds,
     confirmBulkDelete,
     isBulkDeleting,
+    handleBulkStatus,
 
     sorting,
     setSorting,
@@ -47,7 +49,13 @@ export default function SuppliersList() {
     totalRecords,
   } = useSuppliers({
     search: debouncedSearch,
+    is_active: activeFilter !== 'ALL' ? activeFilter === 'active' : undefined,
   });
+
+  const handleResetFilters = useCallback(() => {
+    setSearchValue('');
+    setActiveFilter('ALL');
+  }, []);
 
   const columns = useSuppliersColumns({
     onEdit: openModal,
@@ -56,6 +64,36 @@ export default function SuppliersList() {
 
   const getRealIds = (selectedRows: any[]) => selectedRows.map((row) => row.id || row.original?.id);
 
+
+  const bulkActions = useMemo(
+    () => [
+      {
+        label: t('common.bulk_activate', 'Activar Seleccionados'),
+        icon: <CheckCircle className="h-4 w-4" />,
+        onClick: (rows: any[]) => handleBulkStatus(getRealIds(rows), true),
+      },
+      {
+        label: t('common.bulk_deactivate', 'Desactivar Seleccionados'),
+        icon: <XCircle className="h-4 w-4" />,
+        onClick: (rows: any[]) => handleBulkStatus(getRealIds(rows), false),
+      },
+      {
+        label: t('common.bulk_delete', 'Eliminar Masivo'),
+        icon: <Trash2 className="h-4 w-4" />,
+        variant: 'destructive' as const,
+        onClick: (rows: any[]) => setBulkDeleteIds(getRealIds(rows)),
+      },
+    ],
+    [getRealIds, handleBulkStatus, setBulkDeleteIds, t]
+  );
+
+  
+
+
+  const isResetDisabled =
+    searchValue === '' &&
+    activeFilter === 'ALL';
+    
   return (
     <div className="space-y-4">
       <DataTable
@@ -64,30 +102,23 @@ export default function SuppliersList() {
         isLoading={isLoadingSuppliers}
         showSearch={true}
         showAdd={true}
-        showFilters={false}
+        showFilters={true}
         searchValue={searchValue}
         onSearchChange={setSearchValue}
         searchPlaceholder={t('suppliers.search_placeholder', 'Buscar proveedores por nombre, RIF o contacto...')}
         onAdd={() => openModal()}
         addLabel={t('suppliers.add_button', 'Nuevo Proveedor')}
-        addIcon={<Plus className="mr-2 h-4 w-4" />}
         sorting={sorting}
         onSortingChange={setSorting}
-        onBulkActions={[
-          {
-            label: t('common.bulk_delete', 'Eliminar Masivo'),
-            icon: <Trash2 className="h-4 w-4" />,
-            variant: 'destructive',
-            onClick: (selectedRows) => setBulkDeleteIds(getRealIds(selectedRows)),
-          },
-        ]}
-        renderGridCard={(row) => (
-          <SupplierGridCard
-            row={row}
-            onEdit={openModal}
-            onDelete={(id) => setDeletingId(id)}
+        onBulkActions={bulkActions}
+        filterComponents={
+          <SupplierFilters
+            activeFilter={activeFilter}
+            onActiveChange={(v) => v && setActiveFilter(v)}
+            onReset={handleResetFilters}
+            isResetDisabled={isResetDisabled}
           />
-        )}
+        }
         pagination={{
           pageIndex: page,
           pageSize: perPage,
@@ -115,7 +146,7 @@ export default function SuppliersList() {
         onClose={() => setDeletingId(null)}
         onConfirm={confirmDelete}
         isDeleting={isDeleting}
-        t={t}
+         
       />
 
       <ConfirmDeleteDialog
@@ -124,7 +155,7 @@ export default function SuppliersList() {
         onConfirm={confirmBulkDelete}
         isDeleting={isBulkDeleting}
         count={bulkDeleteIds.length}
-        t={t}
+         
       />
     </div>
   );

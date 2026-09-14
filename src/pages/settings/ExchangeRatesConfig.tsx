@@ -15,17 +15,17 @@ export default function ExchangeRatesConfig() {
   const { t } = useTranslation();
   const { currentRate } = useActiveExchangeRate();
   const {
-    history,
     isLoading,
     form: { register, setValue, formState: { errors } },
     bcvModeValue,
-    currencyUsedValue,
     ratePolicyValue,
     handleSubmitConfig,
     handleSyncBCV,
     isSaving,
     isSyncing,
   } = useExchangeRates()
+
+  const {history} = useActiveExchangeRate()
 
 
   const getSourceBadge = (source?: string) => {
@@ -132,28 +132,7 @@ export default function ExchangeRatesConfig() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmitConfig} className="space-y-6">
-              
-              {/* Moneda Base */}
-              <div className="space-y-3">
-                <Label>{t('settings.exchange.currencyUsedLabel', 'Moneda Base a Usar')}</Label>
-                <RadioGroup
-                  value={currencyUsedValue}
-                  onValueChange={(val) => setValue('currency_used', val, { shouldValidate: true })}
-                  className="flex flex-col sm:flex-row gap-3 sm:gap-6"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="USD" id="currency-usd" />
-                    <Label htmlFor="currency-usd" className="font-normal cursor-pointer">USD ($)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="EUR" id="currency-eur" />
-                    <Label htmlFor="currency-eur" className="font-normal cursor-pointer">EUR (€)</Label>
-                  </div>
-                </RadioGroup>
-                {errors.currency_used && <p className="text-xs text-destructive">{errors.currency_used.message}</p>}
-              </div>
-
+            <form onSubmit={handleSubmitConfig} className="space-y-6">      
               {/* Modo de Tasa */}
               <div className="space-y-3">
                 <Label>{t('settings.business.bcvMode', 'Modo de Tasa (Automático vs Manual)')}</Label>

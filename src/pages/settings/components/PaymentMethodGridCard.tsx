@@ -76,7 +76,7 @@ export function PaymentMethodGridCard<TData>({
 
           {(onEdit || onDelete) && (
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+              <DropdownMenuTrigger >
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
                   <MoreVertical className="h-4 w-4" />
                   <span className="sr-only">{t('common.actions', 'Acciones')}</span>

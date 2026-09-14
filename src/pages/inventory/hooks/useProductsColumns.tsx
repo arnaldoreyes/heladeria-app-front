@@ -8,33 +8,23 @@ import { createSelectColumn } from '@/components/ui/data-table/createSelectColum
 import { createActionsColumn } from '@/components/ui/data-table/createActionsColumn';
 import { DataTableColumnHeader } from '@/components/ui/data-table/DataTableColumnHeader';
 import type { ProductApiResponse } from '../interfaces/product.response';
+import { useActiveExchangeRate } from '@/pages/settings/hooks/useActiveExchangeRate';
 
 interface UseProductsColumnsProps {
   onEdit: (product: ProductApiResponse) => void;
   onDelete: (id: string) => void;
 }
 
-export function useProductsColumns({ onEdit, onDelete }: UseProductsColumnsProps): ColumnDef<ProductApiResponse>[] {
+export function useProductsColumns({ onEdit, onDelete }: UseProductsColumnsProps): ColumnDef<any, ProductApiResponse>[] {
   const { t } = useTranslation(['products', 'common']);
+  const {convertUsdToBs} = useActiveExchangeRate();
 
   return useMemo(
     () => [
       createSelectColumn(),
-
-      {
-        accessorKey: 'sku',
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t('products.sku', 'SKU')} />
-        ),
-        cell: ({ row }) => (
-          <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded border">
-            {row.original.sku}
-          </span>
-        ),
-      },
-
-      {
+        {
         accessorKey: 'name',
+        meta: { title: t('product.name', 'Nombre') },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('common.name', 'Nombre')} />
         ),
@@ -63,9 +53,24 @@ export function useProductsColumns({ onEdit, onDelete }: UseProductsColumnsProps
           );
         },
       },
+      {
+        accessorKey: 'sku',
+        meta: { title: t('product.sku', 'SKU') },
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t('products.sku', 'SKU')} />
+        ),
+        cell: ({ row }) => (
+          <span className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded border">
+            {row.original.sku ?? '-'}
+          </span>
+        ),
+      },
+
+    
 
       {
         accessorKey: 'price_usd',
+        meta: { title: t('products.price', 'Precio (USD)') },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('products.price', 'Precio (USD)')} />
         ),
@@ -75,9 +80,21 @@ export function useProductsColumns({ onEdit, onDelete }: UseProductsColumnsProps
           </span>
         ),
       },
+      {
+        accessorKey: 'price_bs',
+        enableSorting: false,
+        meta: { title: t('products.price', 'Precio (Bs)') },
+        header:t('products.price', 'Precio (Bs)'),
+        cell: ({ row }) => (
+          <span className="font-semibold text-sm">
+            {convertUsdToBs(row.original.price_usd)}Bs.
+          </span>
+        ),
+      },
 
       {
         accessorKey: 'stock',
+        meta: { title: t('products.stock', 'Stock') },
         header: ({ column }) => (
           <DataTableColumnHeader column={column} title={t('products.stock', 'Stock')} />
         ),
@@ -101,6 +118,7 @@ export function useProductsColumns({ onEdit, onDelete }: UseProductsColumnsProps
 
       {
         accessorKey: 'is_active',
+        meta: { title: t('common.status', 'Estado') },
         header: t('common.status', 'Estado'),
         enableSorting: false,
         cell: ({ row }) => (
@@ -132,3 +150,4 @@ export function useProductsColumns({ onEdit, onDelete }: UseProductsColumnsProps
     [onEdit, onDelete, t]
   );
 }
+

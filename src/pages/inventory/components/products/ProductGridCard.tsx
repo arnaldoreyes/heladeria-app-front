@@ -108,9 +108,9 @@ export function ProductGridCard<TData>({
       className={cn(
         'relative h-full group cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between border overflow-hidden bg-card p-3 rounded-2xl',
         // Sin Stock
-        isOutOfStock && 'border-red-500 border-l-[6px]',
+        isOutOfStock && 'border-red-400 ',
         // Stock Crítico
-        !isOutOfStock && isLowStock && 'border-amber-500 border-l-[6px]',
+        !isOutOfStock && isLowStock && 'border-amber-400 ',
         // Stock Normal
         !isOutOfStock &&
           !isLowStock &&
@@ -240,8 +240,8 @@ export function ProductGridCard<TData>({
 
           {/* Stock */}
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
-            <span className="font-semibold uppercase tracking-wider text-[11px]">
-              STOCK:
+            <span className="font-semibold  tracking-wider text-[11px]">
+              Stock:
             </span>
             <span
               className={cn(
@@ -258,7 +258,14 @@ export function ProductGridCard<TData>({
           </div>
           {/* Costo USD */}
             <div className="text-xs text-muted-foreground font-medium pb-0.5">
-              Costo: ${Number(costUsd).toFixed(2)}
+              Costo Unitario: <span className={cn(
+                'font-bold text-sm',
+                isOutOfStock
+                  ? 'text-red-600 dark:text-red-400'
+                  : isLowStock
+                  ? 'text-amber-600 dark:text-amber-400'
+                  : 'text-foreground'
+              )}>${Number(costUsd).toFixed(2)}</span>
             </div>
         </div>
 

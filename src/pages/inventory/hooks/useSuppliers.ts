@@ -14,6 +14,7 @@ import {
   deleteSupplierAction,
   bulkDestroySuppliersAction,
   type GetSupplierFilters,
+  bulkUpdateStatusSuppliersAction,
 } from '../actions/supplier.actions';
 import type { SupplierApiResponse } from '../interfaces/supplier.response';
 import type { ErrorResponse } from '@/types';
@@ -112,6 +113,18 @@ export function useSuppliers(filters: GetSupplierFilters = {}) {
     },
   });
 
+  const bulkStatusMutation = useMutation({
+    mutationFn: ({ ids, is_active }: { ids: string[]; is_active: boolean }) =>
+      bulkUpdateStatusSuppliersAction(ids, is_active),
+    onSuccess: () => {
+      toast.success(t('suppliers.messages.bulk_status_success', 'Estados actualizados exitosamente'));
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+    },
+    onError: () => {
+      toast.error(t('suppliers.messages.bulk_status_error', 'No se pudieron actualizar los estados'));
+    },
+  });
+
   const openModal = (supplier?: SupplierApiResponse) => {
     if (supplier) {
       setEditingSupplier(supplier);
@@ -149,6 +162,10 @@ export function useSuppliers(filters: GetSupplierFilters = {}) {
     if (bulkDeleteIds.length > 0) bulkDeleteMutation.mutate(bulkDeleteIds);
   };
 
+   const handleBulkStatus = (ids: string[], is_active: boolean) => {
+    bulkStatusMutation.mutate({ ids, is_active });
+  };
+
   const totalRecords = suppliersResponse?.meta?.total ?? 0;
   const pageCount = suppliersResponse?.meta?.last_page ?? Math.ceil(totalRecords / perPage) ?? 1;
 
@@ -174,6 +191,7 @@ export function useSuppliers(filters: GetSupplierFilters = {}) {
     setBulkDeleteIds,
     confirmBulkDelete,
     isBulkDeleting: bulkDeleteMutation.isPending,
+    handleBulkStatus,
 
     sorting,
     setSorting,

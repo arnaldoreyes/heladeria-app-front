@@ -20,4 +20,14 @@ export const categorySchema = z.object({
   parent_id: z.string().nullable().optional(),
 });
 
+export const bulkUpdateCategoryRulesSchema = z.object({
+  parent_id: z.string().nullable().optional(),
+  business_percentage: z.number().min(0).max(100).nullable().optional(),
+  personal_percentage: z.number().min(0).max(100).nullable().optional(),
+}).refine(
+  (data) => data.parent_id !== undefined || data.business_percentage !== undefined,
+  { message: 'Debe modificar al menos un campo para actualizar' }
+);
+
+export type BulkUpdateCategoryRulesFormData = z.infer<typeof bulkUpdateCategoryRulesSchema>;
 export type CategoryFormData = z.infer<typeof categorySchema>;

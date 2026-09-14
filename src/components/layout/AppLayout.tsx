@@ -19,10 +19,10 @@ import { useThemeStore } from '@/stores/theme-store';
 import { useActiveExchangeRate } from '@/pages/settings/hooks/useActiveExchangeRate';
 
 const NAV_ITEMS = [
-  { href: '/admin/dashboard', labelKey: 'nav.analytics', defaultLabel: 'Analytics', icon: BarChart3, roles: ['superadmin', 'owner'] },
-  { href: '/admin/sales/new', labelKey: 'nav.pos', defaultLabel: 'Point of Sale', icon: ShoppingCart, roles: ['superadmin', 'owner', 'cashier'] },
-  { href: '/admin/inventory', labelKey: 'nav.inventory', defaultLabel: 'Inventory', icon: Package, roles: ['superadmin', 'owner'] },
-  { href: '/admin/settings', labelKey: 'nav.settings', defaultLabel: 'Settings', icon: Settings, roles: ['superadmin', 'owner'] },
+  { href: '/admin/dashboard', labelKey: 'nav.analytics', defaultLabel: 'Dashboard', icon: BarChart3, roles: ['superadmin', 'owner'] },
+  { href: '/admin/sales/new', labelKey: 'nav.pos', defaultLabel: 'Ventas', icon: ShoppingCart, roles: ['superadmin', 'owner', 'cashier'] },
+  { href: '/admin/inventory', labelKey: 'nav.inventory', defaultLabel: 'Inventario', icon: Package, roles: ['superadmin', 'owner'] },
+  { href: '/admin/settings', labelKey: 'nav.settings', defaultLabel: 'Configuracion', icon: Settings, roles: ['superadmin', 'owner'] },
 ];
 
 export function AppLayout() {
@@ -44,7 +44,6 @@ export function AppLayout() {
   const items = NAV_ITEMS.filter((i) => i.roles.some((r) => userRoles.includes(r)));
   const bottomNavItems = items.slice(0, 5);
   
-  // Ruta por defecto para el logo (primer enlace disponible o fallback)
   const defaultHomeRoute = items[0]?.href || '/admin/sales/new';
 
   const handleLogout = () => {
@@ -52,12 +51,13 @@ export function AppLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background max-w-full overflow-x-hidden">
+    <div className="flex h-screen w-screen overflow-hidden bg-background">
+      
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-screen w-64 flex-col border-r border-border/60 bg-card lg:flex shrink-0">
+      <aside className="hidden h-full w-64 flex-col border-r border-border/60 bg-card lg:flex shrink-0">
         <Link 
           to={defaultHomeRoute} 
-          className="flex items-center gap-3 border-b border-border/60 px-6 py-5 hover:bg-muted/40 transition-colors"
+          className="flex items-center gap-3 border-b border-border/60 px-6 py-5 hover:bg-muted/40 transition-colors shrink-0"
         >
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">
             <Snowflake className="h-5 w-5" />
@@ -68,7 +68,7 @@ export function AppLayout() {
           </div>
         </Link>
 
-        <nav className="flex-1 space-y-1 px-3 py-4">
+        <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
           {items.map((item) => {
             const active = pathname === item.href;
             const Icon = item.icon;
@@ -90,7 +90,7 @@ export function AppLayout() {
           })}
         </nav>
 
-        <div className="border-t border-border/60 p-3">
+        <div className="border-t border-border/60 p-3 shrink-0">
           <div className="mb-3 rounded-lg bg-muted/50 p-3 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-muted-foreground truncate">
@@ -140,10 +140,10 @@ export function AppLayout() {
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden">
+      {/* Main content wrapper */}
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
         {/* Mobile header */}
-        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border/60 bg-card/80 px-4 py-3 backdrop-blur lg:hidden">
+        <header className="flex items-center justify-between border-b border-border/60 bg-card/80 px-4 py-3 backdrop-blur lg:hidden shrink-0">
           <Link to={defaultHomeRoute} className="flex items-center gap-2 min-w-0">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shrink-0">
               <Snowflake className="h-4 w-4" />
@@ -181,7 +181,7 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main className="flex-1 pb-20 lg:pb-0 overflow-x-hidden">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 pb-20 lg:pb-6">
           <Outlet />
         </main>
 

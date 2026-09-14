@@ -78,7 +78,6 @@ export function PaymentMethodDialog({
                 <SelectContent>
                   <SelectItem value="VES">{t('common.currencies.ves', 'Bolívares (VES)')}</SelectItem>
                   <SelectItem value="USD">{t('common.currencies.usd', 'Dólares (USD)')}</SelectItem>
-                  <SelectItem value="EUR">{t('common.currencies.eur', 'Euros (EUR)')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

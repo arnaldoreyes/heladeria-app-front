@@ -7,13 +7,21 @@ export interface GetProductFilters {
   search?: string;
   category_id?: string;
   is_active?: boolean | string;
-  low_stock?: boolean;
+  with_stock?: boolean;
   page?: number;
-  perPage?: number;
+  per_page?: number;
   limit?: number;
   sort_by?: string;
   sort_order?: 'asc' | 'desc';
 }
+export interface BulkUpdateValuesPayload {
+  ids: string[];
+  price_usd?: number | null;
+  cost_usd?: number | null;
+  stock?: number | null;
+  min_stock_alert?: number | null;
+}
+
 
 export const getProductsAction = async (filters: GetProductFilters = {}): Promise<PaginatedProductsResponse> => {
   const { data } = await iceApi.get('/products', {
@@ -52,4 +60,10 @@ export const bulkUpdateStatusProductsAction = async (ids: string[], is_active: b
 export const toggleProductStatusAction = async (id: string): Promise<ProductApiResponse> => {
   const { data } = await iceApi.post(`/products/${id}/toggleStatus`);
   return data;
+};
+
+export const bulkUpdateValuesProductsAction = async (
+  payload: BulkUpdateValuesPayload
+): Promise<void> => {
+  await iceApi.post('/products/bulk-update-values', payload);
 };

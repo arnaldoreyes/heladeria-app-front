@@ -14,10 +14,12 @@ import type { ErrorResponse } from '@/types';
 import { 
   bulkDestroyProductsAction,
   bulkUpdateStatusProductsAction,
+  bulkUpdateValuesProductsAction,
   createProductAction,
   deleteProductAction,
   getProductsAction,
   updateProductAction,
+  type BulkUpdateValuesPayload,
   type GetProductFilters,
    } from '../actions/product.action';
 
@@ -43,7 +45,7 @@ export function useProducts(filters: GetProductFilters = {}) {
   const [editingProduct, setEditingProduct] = useState<ProductApiResponse | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [bulkDeleteIds, setBulkDeleteIds] = useState<string[]>([]);
-
+  const [bulkEditIds, setBulkEditIds] = useState<string[]>([]);
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'name', desc: false },
   ]);
@@ -57,7 +59,7 @@ export function useProducts(filters: GetProductFilters = {}) {
   });
 
   const { data: productsResponse, isLoading: isLoadingProducts } = useQuery({
-    queryKey: ['products', filters.search, filters.category_id, filters.is_active, filters.low_stock, sortBy, sortOrder, page, perPage],
+    queryKey: ['products', filters.search, filters.category_id, filters.is_active, filters.with_stock, sortBy, sortOrder, page, perPage],
     queryFn: () =>
       getProductsAction({
         ...filters,
@@ -121,6 +123,18 @@ export function useProducts(filters: GetProductFilters = {}) {
     },
   });
 
+  const bulkUpdateValuesMutation = useMutation({
+    mutationFn: (payload: BulkUpdateValuesPayload) => bulkUpdateValuesProductsAction(payload),
+    onSuccess: () => {
+      toast.success(t('products.messages.bulk_values_success', 'Valores actualizados exitosamente'));
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      setBulkEditIds([]);
+    },
+    onError: () => {
+      toast.error(t('products.messages.bulk_values_error', 'No se pudieron actualizar los valores'));
+    },
+  });
+
   const bulkStatusMutation = useMutation({
     mutationFn: ({ ids, is_active }: { ids: string[]; is_active: boolean }) =>
       bulkUpdateStatusProductsAction(ids, is_active),
@@ -173,6 +187,12 @@ export function useProducts(filters: GetProductFilters = {}) {
     bulkStatusMutation.mutate({ ids, is_active });
   };
 
+  const handleBulkUpdateValues = (values: Omit<BulkUpdateValuesPayload, 'ids'>) => {
+    if (bulkEditIds.length > 0) {
+      bulkUpdateValuesMutation.mutate({ ids: bulkEditIds, ...values });
+    }
+  };
+
   const totalRecords = productsResponse?.meta?.total  ?? 0;
   const pageCount = productsResponse?.meta?.last_page ?? Math.ceil(totalRecords / perPage) ?? 1;
 
@@ -200,6 +220,11 @@ export function useProducts(filters: GetProductFilters = {}) {
     confirmBulkDelete,
     isBulkDeleting: bulkDeleteMutation.isPending,
     handleBulkStatus,
+
+    bulkEditIds,
+    setBulkEditIds,
+    handleBulkUpdateValues,
+    isBulkUpdatingValues: bulkUpdateValuesMutation.isPending,
 
     sorting,
     setSorting,

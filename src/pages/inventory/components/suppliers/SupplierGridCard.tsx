@@ -4,8 +4,8 @@ import { Edit, Trash2, Truck, Mail, Phone, MapPin, User } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import type { SupplierApiResponse } from '../../interfaces/supplier.response';
 
-import type { SupplierApiResponse } from '../interfaces/supplier.response';
 
 interface SupplierGridCardProps {
   row: SupplierApiResponse;

@@ -26,7 +26,7 @@ export function TabbedLayout({ title, description, navItems }: TabbedLayoutProps
       </div>
 
       <div className="flex flex-col space-y-4">
-        {/* Navegación optimizada: Estilo "Segmented Control" en móvil / Pestañas clásicas en desktop */}
+        
         <div className="bg-muted/50 p-1.5 sm:bg-transparent sm:border-b sm:border-border/60 rounded-xl sm:rounded-none">
           <nav className="flex justify-around sm:justify-start sm:space-x-6" aria-label="Tabs">
             {navItems.map((item) => {
@@ -35,19 +35,19 @@ export function TabbedLayout({ title, description, navItems }: TabbedLayoutProps
                 <NavLink
                   key={item.path}
                   to={item.path}
-                  title={item.label} // Añade tooltip nativo útil para accesibilidad y hover
+                  title={item.label}
                   className={({ isActive }) =>
                     cn(
-                      // En móvil: botones compactos centrados con fondo sutil al estar activo. En desktop: pestañas con borde inferior.
-                      'flex items-center justify-center sm:justify-start gap-2.5 p-3 sm:py-3 sm:px-1 rounded-lg sm:rounded-none sm:border-b-2 transition-all flex-1 sm:flex-initial',
+                      
+                      'flex items-center justify-center sm:justify-start gap-2.5 p-3 sm:py-3 sm:px-1 rounded-lg sm:rounded-none transition-all flex-1 sm:flex-initial',
                       isActive
                         ? 'bg-background sm:bg-transparent sm:border-primary text-primary shadow-sm sm:shadow-none font-medium'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-background/50 sm:hover:bg-transparent'
+                        : 'text-muted-foreground hover:text-foreground  sm:hover:bg-transparent'
                     )
                   }
                 >
                   {Icon && <Icon className="h-5 w-5 shrink-0" />}
-                  {/* Oculto en móvil (solo muestra ícono), visible desde pantallas 'sm' en adelante */}
+                  
                   <span className="hidden sm:inline text-sm">{item.label}</span>
                 </NavLink>
               );
