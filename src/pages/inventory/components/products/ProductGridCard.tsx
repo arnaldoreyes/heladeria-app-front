@@ -159,15 +159,13 @@ export function ProductGridCard<TData>({
 
           {(onEdit || onDelete) && (
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
+              <DropdownMenuTrigger
                   variant="ghost"
                   size="icon"
                   className="h-7 w-7 bg-background/80 backdrop-blur-sm text-muted-foreground hover:text-foreground rounded-md cursor-pointer"
                 >
                   <MoreVertical className="h-4 w-4" />
                   <span className="sr-only">{t('common.actions', 'Acciones')}</span>
-                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-36">
                 {onEdit && (

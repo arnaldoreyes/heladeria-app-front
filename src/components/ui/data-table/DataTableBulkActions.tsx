@@ -44,8 +44,7 @@ export function DataTableBulkActions<TData>({
       <div className="flex items-center gap-1.5 shrink-0">
         {bulkActions.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
+            <DropdownMenuTrigger 
                 variant="default"
                 size="sm"
                 className="rounded-full px-3 md:px-4 h-8 text-xs md:text-sm gap-1.5 font-medium shadow-sm cursor-pointer"
@@ -53,7 +52,6 @@ export function DataTableBulkActions<TData>({
                 <Layers className="h-4 w-4 shrink-0" />
                 <span>{t('common.actions', 'Acciones')}</span>
                 <ChevronDown className="h-3.5 w-3.5 opacity-70 shrink-0" />
-              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 rounded-xl p-1 z-[60]">
               {bulkActions.map((action, index) => (

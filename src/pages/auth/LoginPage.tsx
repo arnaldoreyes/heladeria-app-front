@@ -89,13 +89,14 @@ export default function LoginPage() {
 
           <p className="text-center text-sm text-muted-foreground">
             {t('auth.newBusiness')}{' '}
-            <button
+            <Button
+             variant='link'
               type="button"
               onClick={() => navigate('/auth/register')}
               className="font-medium text-primary hover:underline"
             >
               {t('auth.createAccount')}
-            </button>
+            </Button>
           </p>
         </form>
       </CardContent>

@@ -113,8 +113,7 @@ export function DataTableToolbar<TData extends Record<string, any>>({
         {sortableColumns.length > 0 && (
           <div className={cn("flex items-center", viewMode === 'table' ? "md:hidden" : "")}>
             <DropdownMenu> 
-              <DropdownMenuTrigger asChild>
-                <Button 
+              <DropdownMenuTrigger 
                   variant={sortedColumn ? "secondary" : "outline"} 
                   size="sm" 
                   className="h-9 gap-1.5 px-2.5 text-xs font-medium cursor-pointer"
@@ -129,7 +128,6 @@ export function DataTableToolbar<TData extends Record<string, any>>({
                   <span className="hidden sm:inline">
                     {sortedColumn ? getColumnTitle(sortedColumn) : t('datatable.sort', 'Ordenar')}
                   </span>
-                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 p-1 z-50">
                 <DropdownMenuGroup>
@@ -217,11 +215,8 @@ export function DataTableToolbar<TData extends Record<string, any>>({
         {/* Filtros */}
         {showFilters && filterComponents && (
           <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="h-9">
+            <PopoverTrigger variant="outline" size="sm" className="h-9  border-border border  bg-background font-medium whitespace-nowrap  gap-1 rounded-[min(var(--radius-md),12px)] h-9 w-9 flex items-center justify-center">
                 <Filter className="h-4 w-4" />
-                <span className="hidden lg:block">{t('common.filters', 'Filtros')}</span>
-              </Button>
             </PopoverTrigger>
             <PopoverContent 
               align="end" 

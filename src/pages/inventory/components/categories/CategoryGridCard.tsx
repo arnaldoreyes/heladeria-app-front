@@ -4,7 +4,6 @@ import { Edit, Trash2, MoreVertical, Folder, Package, Layers } from 'lucide-reac
 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
@@ -81,15 +80,11 @@ export function CategoryGridCard<TData>({
             onClick={(e) => e.stopPropagation()}
           >
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
+              <DropdownMenuTrigger 
                   className="h-7 w-7 bg-background/80 backdrop-blur-sm text-muted-foreground hover:text-foreground rounded-md cursor-pointer"
                 >
                   <MoreVertical className="h-4 w-4" />
                   <span className="sr-only">{t('common.actions', 'Acciones')}</span>
-                </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-36">
                 {onEdit && (

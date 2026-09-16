@@ -139,7 +139,7 @@ export function CategoryDialog({
                 filteredIcons.map(({ name, icon: IconComponent, label }) => {
                   const isSelected = iconValue === name;
                   return (
-                    <button
+                    <Button
                       key={name}
                       type="button"
                       onClick={() => setValue('icon', name, { shouldValidate: true, shouldDirty: true })}
@@ -155,7 +155,7 @@ export function CategoryDialog({
                       {isSelected && (
                         <span className="absolute top-1 right-1 flex h-2 w-2 rounded-full bg-primary" />
                       )}
-                    </button>
+                    </Button>
                   );
                 })
               ) : (

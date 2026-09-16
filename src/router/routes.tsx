@@ -17,6 +17,7 @@ import ExchangeRatesConfig from '@/pages/settings/ExchangeRatesConfig';
 import InventoryLayout from '@/pages/inventory/InventoryLayout';
 import ProductsList from '@/pages/inventory/ProductsList';
 import CategoriesList from '@/pages/inventory/CategoryList';
+import RestockList from '@/pages/inventory/RestockList';
 import SuppliersList from '@/pages/inventory/SuppliersList';
 import ExpensesList from '@/pages/inventory/ExpensesList';
 
@@ -75,7 +76,8 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="products" replace /> },
           { path: 'products', Component: ProductsList },      
-          { path: 'categories', Component: CategoriesList },      
+          { path: 'categories', Component: CategoriesList },         
+          { path: 'restocks', Component:  RestockList },
           { path: 'suppliers', Component:  SuppliersList },
           { path: 'history', Component: /* InventoryMovements */ () => <div>Movimientos</div> },
           { path: 'expenses', Component:  ExpensesList},

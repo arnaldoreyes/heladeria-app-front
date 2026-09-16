@@ -46,7 +46,6 @@ iceApi.interceptors.response.use(
 
       // Preservamos las propiedades en response.data para facilitar el acceso en el Frontend
       response.data = data !== undefined ? data : response.data;
-      console.log(response.data);
       // Adjuntamos la metadata directamente en la respuesta de Axios por si se necesita en listas paginadas
       if (meta) (response as any).meta = meta;
       if (links) (response as any).links = links;

@@ -1,5 +1,6 @@
 import { useRouteError, isRouteErrorResponse, Link } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@/components/ui/button';
 
 export default function ErrorPage() {
   const { t } = useTranslation();
@@ -27,12 +28,13 @@ export default function ErrorPage() {
         <p className="text-lg font-medium text-gray-800 mb-2">{t('errors.somethingWentWrong')}</p>
         <p className="text-sm text-gray-500 mb-6">{errorMessage}</p>
         <div className="flex justify-center gap-3">
-          <button
+          <Button
+            variant='outline'
             onClick={() => window.location.reload()}
             className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
           >
             {t('common.reload')}
-          </button>
+          </Button>
           <Link
             to="/pos"
             className="px-4 py-2 border border-transparent rounded-md text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"

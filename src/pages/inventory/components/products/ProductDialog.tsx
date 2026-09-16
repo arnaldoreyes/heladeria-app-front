@@ -34,6 +34,12 @@ export function ProductDialog({
   const categoryIdValue = watch('category_id');
   const isActiveValue = watch('is_active');
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    e.stopPropagation(); // Evita que el evento suba al form de RestockDialog
+    onSubmit(e);
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
@@ -45,7 +51,7 @@ export function ProductDialog({
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="sku">{t('products.sku', 'SKU / Código')}</Label>

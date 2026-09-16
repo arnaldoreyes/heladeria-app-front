@@ -67,6 +67,7 @@
     "filters": "Filtros",
     "selected":"Seleccionado(s)",
     "select": "Seleccionar",
+    "pleaseWait":"Por Favor, Espere...",
     "select_placeholder": "Seleccione un tipo...",
     "email": "Correo electrónico",
     "status_active": "Activo",
@@ -142,6 +143,17 @@
         "bulk_status_error": "No se pudieron actualizar los estados"
       }
     }
+  },
+  "datatable":{
+    "showing_results": "Mostrando <1>{{start}}</1> a <1>{{end}}</1> de <1>{{total}}</1> resultados",
+    "no_results": "No hay resultados disponibles",
+    "rows_per_page": "Filas por página",
+    "page_of": "Página {{current}} de {{total}}",
+    "first_page": "Ir a la primera página",
+    "previous_page": "Página anterior",
+    "next_page": "Página siguiente",
+    "last_page": "Ir a la última página",
+    "empty_table": "No hay resultados disponibles"
   },
   "errors": {
     "oops": "¡Ups!",
