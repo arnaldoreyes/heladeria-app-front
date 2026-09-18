@@ -11,7 +11,6 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import ErrorPage from '@/pages/errors/ErrorPage';
 import { AdminRoute, NotAuthenticatedRoute } from './guards/ProtectedRoutes';
 import SettingsLayout from '@/pages/settings/SettingsLayout';
-import BusinessSettings from '@/pages/settings/BusinessSettings';
 import PaymentMethodsConfig from '@/pages/settings/PaymentMethodsConfig';
 import ExchangeRatesConfig from '@/pages/settings/ExchangeRatesConfig';
 import InventoryLayout from '@/pages/inventory/InventoryLayout';
@@ -20,6 +19,7 @@ import CategoriesList from '@/pages/inventory/CategoryList';
 import RestockList from '@/pages/inventory/RestockList';
 import SuppliersList from '@/pages/inventory/SuppliersList';
 import ExpensesList from '@/pages/inventory/ExpensesList';
+import { BusinessSettingForm } from '@/features/business/components/BusinessSettingForm';
 
 // AdminPages
 
@@ -88,7 +88,7 @@ export const router = createBrowserRouter([
       { path: 'settings', Component:  SettingsLayout, 
         children: [
           { index: true, element: <Navigate to="general" replace /> },         
-          { path: 'general', Component: BusinessSettings },
+          { path: 'general', Component: BusinessSettingForm },
           { path: 'payment-methods', Component:  PaymentMethodsConfig },
           { path: 'exchange-rates', Component:  ExchangeRatesConfig },  
           { path: 'users', Component: /* UsersList */ () => <div>Usuarios / Empleados</div> },           
