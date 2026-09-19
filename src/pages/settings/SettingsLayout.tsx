@@ -1,4 +1,4 @@
-import { Store, CreditCard, DollarSign } from 'lucide-react';
+import { Store, CreditCard, DollarSign, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TabbedLayout, type NavItem } from '@/components/layout/TabbedLayout';
 
@@ -20,6 +20,11 @@ export default function SettingsLayout() {
       path: '/admin/settings/exchange-rates', 
       label: t('settings.nav.exchangeRates', 'Tasas de Cambio'), 
       icon: DollarSign 
+    },
+    { 
+      path: '/admin/settings/customers', 
+      label: t('settings.nav.customers', 'Clientes'), 
+      icon: Users 
     },
   ];
 

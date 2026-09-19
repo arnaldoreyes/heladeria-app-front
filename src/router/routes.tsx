@@ -20,6 +20,7 @@ import ExpensesList from '@/pages/inventory/ExpensesList';
 import { BusinessSettingForm } from '@/features/business/components/BusinessSettingForm';
 import PaymentMethodsView from '@/features/payment-methods/components/PaymentMethodsView';
 import ExchangeRatesForm from '@/features/exchange-rates/components/ExchangeRatesForm';
+import CustomersView from '@/features/customers/components/CustomerView';
 
 // AdminPages
 
@@ -91,6 +92,7 @@ export const router = createBrowserRouter([
           { path: 'general', Component: BusinessSettingForm },
           { path: 'payment-methods', Component:  PaymentMethodsView },
           { path: 'exchange-rates', Component:  ExchangeRatesForm },  
+          { path: 'customers', Component: CustomersView },      
           { path: 'users', Component: /* UsersList */ () => <div>Usuarios / Empleados</div> },           
         ]
       },
