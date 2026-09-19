@@ -4,15 +4,15 @@ import { useDebounce } from 'use-debounce';
 import { Trash2, CheckCircle, XCircle } from 'lucide-react';
 
 import { DataTable } from '@/components/ui/data-table/DataTable';
-import { PaymentMethodDialog } from './components/PaymentMethodDialog';
+import { PaymentMethodDialog } from './PaymentMethodDialog';
 import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
-import { PaymentMethodGridCard } from './components/PaymentMethodGridCard';
-import { PaymentMethodFilters } from './components/PaymentMethodFilters';
+import { PaymentMethodGridCard } from './PaymentMethodGridCard';
+import { PaymentMethodFilters } from './PaymentMethodFilters';
 
-import { usePaymentMethods } from './hooks/usePaymentMethods';
-import { usePaymentMethodsColumns } from './hooks/usePaymentMethodsColumns';
+import { usePaymentMethods } from '../hooks/usePaymentMethods';
+import { usePaymentMethodsColumns } from '../hooks/usePaymentMethodsColumns';
 
-export default function PaymentMethodsConfig() {
+export default function PaymentMethodsView() {
   const { t } = useTranslation(['settings', 'common']);
 
   // Estados de Filtros
@@ -33,6 +33,7 @@ export default function PaymentMethodsConfig() {
     form,
     onSubmit,
     isSaving,
+    isDirty,
     isEditing,
     deletingId,
     setDeletingId,
@@ -44,6 +45,7 @@ export default function PaymentMethodsConfig() {
     isBulkDeleting,
     sorting,
     setSorting,
+    handleToggleStatus, 
     handleBulkStatus,
     page,
     setPage,
@@ -58,9 +60,11 @@ export default function PaymentMethodsConfig() {
     payment_type_id: paymentTypeFilter !== 'ALL' ? paymentTypeFilter : undefined,
   });
 
+  // Pasamos el handler al hook de columnas
   const columns = usePaymentMethodsColumns({
-    onEdit: openModal,
+    onEdit: (method) => openModal(method),
     onDelete: (id) => setDeletingId(id),
+    onToggleStatus: (id) => handleToggleStatus(id),
   });
 
   const handleResetFilters = useCallback(() => {
@@ -136,7 +140,7 @@ export default function PaymentMethodsConfig() {
         renderGridCard={(row) => (
           <PaymentMethodGridCard
             row={row}
-            onEdit={openModal}
+            onEdit={() => openModal(row.original)}
             onDelete={(id) => setDeletingId(id)}
           />
         )}
@@ -160,6 +164,7 @@ export default function PaymentMethodsConfig() {
         form={form}
         onSubmit={onSubmit}
         isSaving={isSaving}
+        isDirty={isDirty}
         paymentTypes={paymentTypes}
       />
 

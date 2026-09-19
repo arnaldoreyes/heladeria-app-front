@@ -41,3 +41,47 @@ export const cleanParams = (params: Record<string, any>) => {
     )
   );
 };
+
+/**
+ * Convierte un objeto genérico a FormData para soportar el envío de archivos (multipart/form-data).
+ * Maneja booleanos (0/1), instancias de File/FileList y soporte para '_method' de Laravel.
+ */
+export const objectToFormData = <T extends Record<string, any>>(
+  payload: T,
+  methodOverride?: 'PUT' | 'PATCH'
+): FormData => {
+  const formData = new FormData();
+
+  if (methodOverride) {
+    formData.append('_method', methodOverride);
+  }
+
+  Object.entries(payload).forEach(([key, value]) => {
+    // Ignorar nulos o indefinidos
+    if (value === null || value === undefined) return;
+
+    // Manejo de archivos (File y FileList)
+    if (value instanceof File) {
+      formData.append(key, value);
+      return;
+    }
+
+    if (value instanceof FileList) {
+      if (value.length > 0) {
+        formData.append(key, value[0]);
+      }
+      return;
+    }
+
+    // Conversión de booleanos para compatibilidad con Laravel
+    if (typeof value === 'boolean') {
+      formData.append(key, value ? '1' : '0');
+      return;
+    }
+
+    // Si es una string (p. ej. una URL de imagen previa) o un primitivo estándar
+    formData.append(key, String(value));
+  });
+
+  return formData;
+};

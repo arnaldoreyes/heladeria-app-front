@@ -6,88 +6,81 @@ import { toast } from 'sonner';
 
 import { getBusinessAction, updateBusinessAction } from '../actions/business-setting.action';
 import { businessSchema, type BusinessFormData } from '../schemas/business-setting.schema';
+import type { ErrorResponse } from '@/interfaces/api.interface';
+
+const DEFAULT_BUSINESS_VALUES: BusinessFormData = {
+  name: '',
+  niche: '',
+  default_profit_percentage: 40,
+  default_reinvestment_percentage: 60,    
+  print_ticket_on_sale: false,
+  ticket_header_notes: '',
+  ticket_footer_notes: '',
+};
 
 /**
  * Custom Hook para la gestión de la configuración general del negocio.
- * 
- * Orquesta la lectura de datos desde la API via TanStack Query, el estado local
- * y validación del formulario con React Hook Form + Zod, y el envío de mutaciones.
- * 
- * @returns Objeto con instancia del formulario, estados de carga, manejador de submit y Helpers de UI.
  */
 export function useBusinessSetting() {
-  const { t } = useTranslation();
+  const { t } = useTranslation(['settings', 'common']);
   const queryClient = useQueryClient();
 
   // 1. Obtención de datos del servidor
   const { data: businessData, isLoading: isLoadingBusiness } = useQuery({
     queryKey: ['settings', 'business'],
     queryFn: getBusinessAction,
+    staleTime: 1000 * 60 * 30, // 30 minutos de caché (rara vez cambia externamente)
   });
 
-  // 2. Inicialización del Formulario
+  // 2. Inicialización del Formulario con sincronización automática
   const form = useForm<BusinessFormData>({
     resolver: zodResolver(businessSchema),
     mode: 'onTouched',
-    values: businessData, 
-    resetOptions: {
-      keepDirtyValues: true,
-    },
-    defaultValues: {
-      name: '',
-      niche: '',
-      default_profit_percentage: 40,
-      default_reinvestment_percentage: 60,
-      print_ticket_on_sale: false,
-      ticket_header_notes: '',
-      ticket_footer_notes: '',
-    },
+    values: businessData || DEFAULT_BUSINESS_VALUES,
+    defaultValues: DEFAULT_BUSINESS_VALUES,
   });
 
   const { control, setValue, formState: { isSubmitting, isDirty } } = form;
 
-  // 2. Suscripciones aisladas y seguras para el React Compiler mediante useWatch
-  const printTicketOnSale = useWatch({
-    control,
-    name: 'print_ticket_on_sale',
-  });
+  // 3. Suscripciones aisladas y seguras mediante useWatch
+  const printTicketOnSale = useWatch({ control, name: 'print_ticket_on_sale' });
+  const defaultReinvestment = useWatch({ control, name: 'default_reinvestment_percentage' });
+  const defaultProfit = useWatch({ control, name: 'default_profit_percentage' });
 
-  const defaultReinvestment = useWatch({
-    control,
-    name: 'default_reinvestment_percentage',
-  });
-
-  const defaultProfit = useWatch({
-    control,
-    name: 'default_profit_percentage',
-  });
-
-  // 3. Mutación para guardar cambios
+  // 4. Mutación para guardar cambios
   const mutation = useMutation({
     mutationFn: updateBusinessAction,
-    onSuccess: () => {
+    onSuccess: (updatedData) => {
       toast.success(t('settings.business.successMsg', 'Configuración guardada correctamente'));
+      
+      // Actualizamos directamente la caché para respuesta instantánea sin refetch
+      queryClient.setQueryData(['settings', 'business'], updatedData);
       queryClient.invalidateQueries({ queryKey: ['settings', 'business'] });
+
+      // Reseteamos el estado dirty del formulario alineándolo con la data guardada
+      if (updatedData) {
+        form.reset(updatedData);
+      }
     },
-    onError: () => {
-      toast.error(t('settings.business.errorMsg', 'Ocurrió un error al guardar'));
+    onError: (error: ErrorResponse) => {
+      toast.error(error?.message || t('settings.business.errorMsg', 'Ocurrió un error al guardar'));
     },
   });
 
-  /**
-   * Procesa la sumisión del formulario validado.
-   */
+  // Handlers
   const onSubmit = form.handleSubmit((values) => {
     mutation.mutate(values);
   });
 
-  /**
-   * Actualiza atómicamente la distribución de ganancias y reinversión.
-   * Modifica el estado dirty y fuerza la re-validación.
-   */
   const updateDistribution = (businessVal: number, personalVal: number) => {
-    setValue('default_reinvestment_percentage', businessVal, { shouldValidate: true, shouldDirty: true });
-    setValue('default_profit_percentage', personalVal, { shouldValidate: true, shouldDirty: true });
+    setValue('default_reinvestment_percentage', businessVal, { 
+      shouldValidate: true, 
+      shouldDirty: true 
+    });
+    setValue('default_profit_percentage', personalVal, { 
+      shouldValidate: true, 
+      shouldDirty: true 
+    });
   };
 
   return {

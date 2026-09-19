@@ -114,9 +114,7 @@ export function DataTableToolbar<TData extends Record<string, any>>({
           <div className={cn("flex items-center", viewMode === 'table' ? "md:hidden" : "")}>
             <DropdownMenu> 
               <DropdownMenuTrigger 
-                  variant={sortedColumn ? "secondary" : "outline"} 
-                  size="sm" 
-                  className="h-9 gap-1.5 px-2.5 text-xs font-medium cursor-pointer"
+                  className="h-9  border-border border  bg-background font-medium whitespace-nowrap  gap-2 p-2 rounded-[min(var(--radius-md),12px)] flex items-center justify-center"
                 >
                   {currentSortDirection === 'asc' ? (
                     <ArrowUp className="h-4 w-4 text-primary" />
@@ -215,13 +213,12 @@ export function DataTableToolbar<TData extends Record<string, any>>({
         {/* Filtros */}
         {showFilters && filterComponents && (
           <Popover>
-            <PopoverTrigger variant="outline" size="sm" className="h-9  border-border border  bg-background font-medium whitespace-nowrap  gap-1 rounded-[min(var(--radius-md),12px)] h-9 w-9 flex items-center justify-center">
+            <PopoverTrigger className="h-9  border-border border  bg-background font-medium whitespace-nowrap  gap-1 rounded-[min(var(--radius-md),12px)] h-9 w-9 flex items-center justify-center">
                 <Filter className="h-4 w-4" />
             </PopoverTrigger>
             <PopoverContent 
               align="end" 
               sideOffset={8}
-              collisionPadding={16}
               className="w-[calc(100vw-32px)] sm:w-80 p-4 space-y-3"
             >
               <div className="hidden lg:block font-semibold">

@@ -1,3 +1,5 @@
+import type { SuccessResponse } from "./api.interface";
+
 export interface BusinessSetting{
   id: string;
   business_id: string;
@@ -18,3 +20,6 @@ export interface Business {
   logo_url: string | null;
   settings: BusinessSetting
 }
+export type BusinessApiResponse = SuccessResponse<Business>;
+
+export type BusinesssListApiResponse = SuccessResponse<Business[]>;

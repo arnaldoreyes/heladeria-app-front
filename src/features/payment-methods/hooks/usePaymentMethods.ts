@@ -2,28 +2,23 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { SortingState } from '@tanstack/react-table';
 
-import { paymentMethodSchema, type PaymentMethodFormData } from '../schemas/settings.schema';
+import { paymentMethodSchema, type PaymentMethodFormData } from '../schemas/payment-methods.schema';
 import { 
   createPaymentMethodAction, 
   deletePaymentMethodAction, 
   getPaymentMethodsAction, 
   updatePaymentMethodAction,
+  togglePaymentMethodStatusAction,
   bulkDestroyPaymentMethodsAction,
   bulkUpdateStatusPaymentMethodsAction,      
 } from '../actions/payment.actions';
 import { getPaymentTypesAction } from '../actions/payment-types.actions';
-import type { ErrorResponse } from '@/types';
-
-interface FilterParams {
-  search?: string;
-  currency?: string;
-  is_active?: boolean ;
-  payment_type_id?: string;
-}
+import type { ErrorResponse } from '@/interfaces/api.interface';
+import type { PaymentMethod, PaymentMethodQueryParams } from '@/interfaces/payment-methods.interface';
 
 const DEFAULT_FORM_VALUES: PaymentMethodFormData = {
   name: '',
@@ -34,21 +29,51 @@ const DEFAULT_FORM_VALUES: PaymentMethodFormData = {
   payment_type_id: '',
   account_number: '',
   id_document: '',
+  qr_code_url: '',
 };
 
-export function usePaymentMethods(filters: FilterParams = {}) {
+export function usePaymentMethods(filters: PaymentMethodQueryParams = {}) {
   const { t } = useTranslation(['settings', 'common']);
   const queryClient = useQueryClient();
-  const [page, setPage] = useState<number>(1);
-  const [perPage, setPerPage] = useState<number>(10);
 
   // --- 1. ESTADOS LOCALES ---
+  const [page, setPage] = useState<number>(1);
+  const [perPage, setPerPage] = useState<number>(10);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingMethod, setEditingMethod] = useState<PaymentMethodFormData | null>(null);
+  
+  const [editingMethod, setEditingMethod] = useState<PaymentMethod | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [bulkDeleteIds, setBulkDeleteIds] = useState<string[]>([]);
 
-  // Estado de Ordenamiento (TanStack Table)
+  // Guardamos un fingerprint de los filtros para resetear la página en render si cambian
+  const { search, currency, is_active, payment_type_id } = filters;
+  const [prevFilters, setPrevFilters] = useState({ search, currency, is_active, payment_type_id });
+
+  // Si los filtros cambiaron desde el último render, ajustamos el estado inmediatamente (sin useEffect)
+  if (
+    prevFilters.search !== search ||
+    prevFilters.currency !== currency ||
+    prevFilters.is_active !== is_active ||
+    prevFilters.payment_type_id !== payment_type_id
+  ) {
+    setPrevFilters({ search, currency, is_active, payment_type_id });
+    setPage(1);
+    setBulkDeleteIds([]);
+  }
+
+  // Wrappers de estado para resetear selecciones al cambiar de página
+  const handleSetPage = (newPage: number | ((prev: number) => number)) => {
+    setPage(newPage);
+    setBulkDeleteIds([]);
+  };
+
+  const handleSetPerPage = (newPerPage: number | ((prev: number) => number)) => {
+    setPerPage(newPerPage);
+    setPage(1);
+    setBulkDeleteIds([]);
+  };
+
+  // Estado de Ordenamiento
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'name', desc: false },
   ]);
@@ -56,34 +81,49 @@ export function usePaymentMethods(filters: FilterParams = {}) {
   const sortBy = sorting.length > 0 ? sorting[0].id : undefined;
   const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : undefined;
 
-  // --- 2. FORMULARIO (React Hook Form + Zod) ---
+  // --- 2. FORMULARIO ---
   const form = useForm<PaymentMethodFormData>({
     resolver: zodResolver(paymentMethodSchema),
     defaultValues: DEFAULT_FORM_VALUES,
   });
 
-  // --- 3. QUERIES (Lectura de datos) ---
-  const { data: methodsResponse, isLoading: isLoadingMethods } = useQuery({
-    queryKey: ['payment-methods', filters.search, filters.currency,  filters.payment_type_id,  filters.is_active, sortBy, sortOrder, page, perPage],
+  const {formState: { isSubmitting, isDirty } } = form;
+
+
+  // --- 3. QUERIES ---
+  const { data: methodsResponse, isLoading: isLoadingMethods, isFetching } = useQuery({
+    queryKey: ['payment-methods', { search, currency, is_active, payment_type_id, sortBy, sortOrder, page, perPage }],
     queryFn: () =>
       getPaymentMethodsAction({
-        ...filters,
+        search,
+        currency,
+        is_active,
+        payment_type_id,
         page,
         per_page: perPage,
         sort_by: sortBy,
         sort_order: sortOrder,
       }),
+    placeholderData: keepPreviousData,
   });
 
   const { data: typesResponse } = useQuery({
     queryKey: ['payment-types'],
     queryFn: getPaymentTypesAction,
+    staleTime: 1000 * 60 * 60,
   });
 
   const methods = methodsResponse?.data || [];
   const paymentTypes = typesResponse?.data || [];
+  const totalRecords = methodsResponse?.meta?.total ?? 0;
+  const pageCount = methodsResponse?.meta?.last_page ?? 1;
 
-  // --- 4. MUTACIONES (Escritura de datos) ---
+  // Ajuste síncrono de página si excede el límite tras borrados
+  if (page > pageCount && pageCount > 0) {
+    setPage(pageCount);
+  }
+
+  // --- 4. MUTACIONES ---
   const saveMutation = useMutation({
     mutationFn: (values: PaymentMethodFormData) => {
       if (editingMethod?.id) {
@@ -101,6 +141,17 @@ export function usePaymentMethods(filters: FilterParams = {}) {
     },
   });
 
+  const toggleStatusMutation = useMutation({
+    mutationFn: (id: string) => togglePaymentMethodStatusAction(id),
+    onSuccess: () => {
+      toast.success(t('settings.payments.messages.status_updated', 'Estado cambiado correctamente'));
+      queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(error?.message || t('settings.payments.messages.status_error', 'Error al cambiar el estado'));
+    },
+  });
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deletePaymentMethodAction(id),
     onSuccess: () => {
@@ -108,8 +159,8 @@ export function usePaymentMethods(filters: FilterParams = {}) {
       queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
       setDeletingId(null);
     },
-    onError: () => {
-      toast.error(t('settings.payments.messages.deleted_error', 'No se pudo eliminar'));
+    onError: (error: ErrorResponse) => {
+      toast.error(error?.message || t('settings.payments.messages.deleted_error', 'No se pudo eliminar'));
     },
   });
 
@@ -120,8 +171,8 @@ export function usePaymentMethods(filters: FilterParams = {}) {
       queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
       setBulkDeleteIds([]);
     },
-    onError: () => {
-      toast.error(t('settings.payments.messages.bulk_deleted_error', 'No se pudieron eliminar los registros'));
+    onError: (error: ErrorResponse) => {
+      toast.error(error?.message || t('settings.payments.messages.bulk_deleted_error', 'No se pudieron eliminar los registros'));
     },
   });
 
@@ -131,14 +182,15 @@ export function usePaymentMethods(filters: FilterParams = {}) {
     onSuccess: () => {
       toast.success(t('settings.payments.messages.bulk_status_success', 'Estados actualizados exitosamente'));
       queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
+      setBulkDeleteIds([]);
     },
-    onError: () => {
-      toast.error(t('settings.payments.messages.bulk_status_error', 'No se pudieron actualizar los estados'));
+    onError: (error: ErrorResponse) => {
+      toast.error(error?.message || t('settings.payments.messages.bulk_status_error', 'No se pudieron actualizar los estados'));
     },
   });
 
-  // --- 5. HANDLERS Y CONTROLADORES ---
-  const openModal = (method?: PaymentMethodFormData) => {
+  // --- 5. HANDLERS ---
+  const openModal = (method?: PaymentMethod) => {
     if (method) {
       setEditingMethod(method);
       form.reset({
@@ -150,6 +202,7 @@ export function usePaymentMethods(filters: FilterParams = {}) {
         payment_type_id: method.payment_type_id || '',
         account_number: method.account_number || '',
         id_document: method.id_document || '',
+        qr_code_url: method.qr_code_url || '',
       });
     } else {
       setEditingMethod(null);
@@ -161,9 +214,14 @@ export function usePaymentMethods(filters: FilterParams = {}) {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingMethod(null);
+    form.reset(DEFAULT_FORM_VALUES);
   };
 
   const onSubmit = form.handleSubmit((values) => saveMutation.mutate(values));
+
+  const handleToggleStatus = (id: string) => {
+    toggleStatusMutation.mutate(id);
+  };
 
   const confirmDelete = () => {
     if (deletingId) deleteMutation.mutate(deletingId);
@@ -177,48 +235,43 @@ export function usePaymentMethods(filters: FilterParams = {}) {
     bulkStatusMutation.mutate({ ids, is_active });
   };
 
-  
-  const totalRecords = methodsResponse?.meta?.total ?? 0;
-  const pageCount = methodsResponse?.meta?.last_page ?? Math.ceil(totalRecords / perPage) ?? 1;
-
   // --- 6. RETORNO ---
   return {
-    // Datos de la API
     methods,
     paymentTypes,
     isLoadingMethods,
+    isFetchingMethods: isFetching,
 
-    // Modal y Formulario
     isModalOpen,
     setIsModalOpen,
     openModal,
     closeModal,
     form,
     onSubmit,
-    isSaving: saveMutation.isPending,
+    isSaving: saveMutation.isPending || isSubmitting,
+    isDirty,
     isEditing: !!editingMethod,
 
-    // Eliminación Individual
+    handleToggleStatus,
+    isTogglingStatus: toggleStatusMutation.isPending,
+
     deletingId,
     setDeletingId,
     confirmDelete,
     isDeleting: deleteMutation.isPending,
 
-    // Operaciones Masivas (Bulk)
     bulkDeleteIds,
     setBulkDeleteIds,
     confirmBulkDelete,
     isBulkDeleting: bulkDeleteMutation.isPending,
     handleBulkStatus,
 
-    // Estado de Ordenamiento
     sorting,
     setSorting,
-    
     page,
-    setPage,
+    setPage: handleSetPage,
     perPage,
-    setPerPage,
+    setPerPage: handleSetPerPage,
     pageCount,
     totalRecords,
   };

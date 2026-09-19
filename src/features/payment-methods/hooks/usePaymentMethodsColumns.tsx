@@ -4,24 +4,30 @@ import { Edit, Trash2 } from 'lucide-react';
 import type { ColumnDef } from '@tanstack/react-table';
 
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { createSelectColumn } from '@/components/ui/data-table/createSelectColumn';
 import { createActionsColumn } from '@/components/ui/data-table/createActionsColumn';
 import { DataTableColumnHeader } from '@/components/ui/data-table/DataTableColumnHeader';
-import type { PaymentMethodFormData } from '../schemas/settings.schema';
+import type { PaymentMethod } from '@/interfaces/payment-methods.interface';
+import { PaymentMethodQrDialog } from '../components/PaymentMethodQrDialog';
 
-interface UsePaymentColumnsProps {
-  onEdit: (method: PaymentMethodFormData) => void;
+interface UsePaymentMethodsColumnsProps {
+  onEdit: (method: PaymentMethod) => void;
   onDelete: (id: string) => void;
+  onToggleStatus: (id: string) => void;
 }
 
-export function usePaymentMethodsColumns({ onEdit, onDelete }: UsePaymentColumnsProps): ColumnDef< PaymentMethodFormData>[] {
+export function usePaymentMethodsColumns({
+  onEdit,
+  onDelete,
+  onToggleStatus,
+}: UsePaymentMethodsColumnsProps): ColumnDef<any, PaymentMethod, any>[] {
   const { t } = useTranslation(['settings', 'common']);
 
   return useMemo(
     () => [
-      createSelectColumn(),
-      
-      // Columna: Nombre
+      createSelectColumn<PaymentMethod>(),
+
       {
         accessorKey: 'name',
         meta: { title: t('common.name', 'Nombre') },
@@ -33,7 +39,6 @@ export function usePaymentMethodsColumns({ onEdit, onDelete }: UsePaymentColumns
         ),
       },
 
-      // Columna: Moneda
       {
         accessorKey: 'currency',
         meta: { title: t('common.currency', 'Moneda') },
@@ -47,7 +52,6 @@ export function usePaymentMethodsColumns({ onEdit, onDelete }: UsePaymentColumns
         ),
       },
 
-      // Columna: Tipo de Pago (Agregada como columna dedicada)
       {
         id: 'type.name',
         accessorKey: 'type.name',
@@ -63,23 +67,59 @@ export function usePaymentMethodsColumns({ onEdit, onDelete }: UsePaymentColumns
         },
       },
 
-      // Columna: Estado
+      // Nueva Columna QR
+      {
+        id: 'qr',
+        header: t('settings.payments.qr', 'QR'),
+        meta: { title: t('settings.payments.qr', 'QR') },
+        enableSorting: false,
+        cell: ({ row }) => {
+          const method = row.original;
+          const hasQr = Boolean(method.qr_code_url || method.account_number || method.id_document);
+
+          
+
+          if (!hasQr || row.original.type?.code == 'cash_bs' || row.original.type?.code == 'cash_usd') {
+            return <span className="text-xs text-muted-foreground">{t('common.n_a', 'N/A')}</span>;
+          }
+
+          return (
+            <PaymentMethodQrDialog
+              qrCodeUrl={method.qr_code_url}
+              bankName={method.bank_name}
+              idDocument={method.id_document}
+              accountNumber={method.account_number}
+            />
+          );
+        },
+      },
+
+      // Columna Estado con el Switch integrado
       {
         accessorKey: 'is_active',
         header: t('common.status', 'Estado'),
-        meta: { title: t('common.status', 'Estado')},
+        meta: { title: t('common.status', 'Estado') },
         enableSorting: false,
-        cell: ({ row }) => (
-          <Badge variant={row.original.is_active ? 'outline' : 'destructive'}>
-            {row.original.is_active
-              ? t('common.active', 'Activo')
-              : t('common.inactive', 'Inactivo')}
-          </Badge>
-        ),
+        cell: ({ row }) => {
+          const method = row.original;
+          return (
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={method.is_active}
+                onCheckedChange={() => onToggleStatus(method.id)}
+                aria-label={t('settings.payments.toggle_status', 'Cambiar estado')}
+              />
+              <span className="text-xs text-muted-foreground">
+                {method.is_active
+                  ? t('common.active', 'Activo')
+                  : t('common.inactive', 'Inactivo')}
+              </span>
+            </div>
+          );
+        },
       },
 
-      // Columna: Acciones
-      createActionsColumn<PaymentMethodFormData>(
+      createActionsColumn<PaymentMethod>(
         [
           {
             label: t('common.edit', 'Editar'),
@@ -96,6 +136,6 @@ export function usePaymentMethodsColumns({ onEdit, onDelete }: UsePaymentColumns
         t('common.actions', 'Acciones')
       ),
     ],
-    [onEdit, onDelete, t]
+    [onEdit, onDelete, onToggleStatus, t]
   );
 }
