@@ -11,7 +11,6 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import ErrorPage from '@/pages/errors/ErrorPage';
 import { AdminRoute, NotAuthenticatedRoute } from './guards/ProtectedRoutes';
 import SettingsLayout from '@/pages/settings/SettingsLayout';
-import ExchangeRatesConfig from '@/pages/settings/ExchangeRatesConfig';
 import InventoryLayout from '@/pages/inventory/InventoryLayout';
 import ProductsList from '@/pages/inventory/ProductsList';
 import CategoriesList from '@/pages/inventory/CategoryList';
@@ -20,6 +19,7 @@ import SuppliersList from '@/pages/inventory/SuppliersList';
 import ExpensesList from '@/pages/inventory/ExpensesList';
 import { BusinessSettingForm } from '@/features/business/components/BusinessSettingForm';
 import PaymentMethodsView from '@/features/payment-methods/components/PaymentMethodsView';
+import ExchangeRatesForm from '@/features/exchange-rates/components/ExchangeRatesForm';
 
 // AdminPages
 
@@ -90,7 +90,7 @@ export const router = createBrowserRouter([
           { index: true, element: <Navigate to="general" replace /> },         
           { path: 'general', Component: BusinessSettingForm },
           { path: 'payment-methods', Component:  PaymentMethodsView },
-          { path: 'exchange-rates', Component:  ExchangeRatesConfig },  
+          { path: 'exchange-rates', Component:  ExchangeRatesForm },  
           { path: 'users', Component: /* UsersList */ () => <div>Usuarios / Empleados</div> },           
         ]
       },
