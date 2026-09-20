@@ -21,7 +21,7 @@ export function DataTablePagination({
   onPageChange,
   onPageSizeChange,
 }: DataTablePaginationProps) {
-  const { t } = useTranslation('datatable');
+  const { t } = useTranslation(); 
   const { pageIndex, pageSize, pageCount, total } = pagination;
 
   const startRecord = (pageIndex - 1) * pageSize + 1;
@@ -34,7 +34,6 @@ export function DataTablePagination({
         {total > 0 ? (
           <Trans
             i18nKey="datatable.showing_results"
-             
             values={{ start: startRecord, end: endRecord, total }}
             components={{
               strong: <span className="font-medium" />,
@@ -47,7 +46,6 @@ export function DataTablePagination({
 
       {/* Controles de paginación */}
       <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-        {/* Selector de filas por página */}
         <div className="flex items-center space-x-2">
           <p className="text-xs font-medium whitespace-nowrap sm:text-sm">
             {t('datatable.rows_per_page')}

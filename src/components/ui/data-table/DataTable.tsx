@@ -69,6 +69,7 @@ interface DataTableProps<TData extends Record<string, any>> {
   sorting?: SortingState
   onSortingChange?: OnChangeFn<SortingState>
   defaultViewMode?: 'table' | 'grid'
+  enableRowSelection?: boolean
   renderGridCard?: (row: any) => React.ReactNode
 }
 
@@ -90,6 +91,7 @@ export function DataTable<TData extends Record<string, any>>({
   showAdd = false,
   showFilters = false,
   onBulkActions,
+  enableRowSelection = true,
   sorting,
   onSortingChange,
   defaultViewMode = 'table',
@@ -136,6 +138,7 @@ export function DataTable<TData extends Record<string, any>>({
         onViewModeChange={setViewMode}
         isAllSelected={table.getIsAllPageRowsSelected()}
         onToggleSelectAll={table.getToggleAllPageRowsSelectedHandler()}
+        enableRowSelection={enableRowSelection}
         table={table}
       />
 
@@ -165,7 +168,7 @@ export function DataTable<TData extends Record<string, any>>({
         ) : table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row) => (
             <div key={row.id} className="relative h-full">
-              {renderGridCard ? renderGridCard(row) : <DefaultGridCard row={row} />}
+              {renderGridCard ? renderGridCard(row) : <DefaultGridCard row={row} enableRowSelection={enableRowSelection} />}
             </div>
           ))
         ) : (

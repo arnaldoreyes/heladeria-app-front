@@ -40,6 +40,7 @@ interface DataTableToolbarProps<TData extends Record<string, any>> {
   viewMode?: 'table' | 'grid';
   onViewModeChange?: (mode: 'table' | 'grid') => void;
 
+  enableRowSelection?: boolean;
   isAllSelected?: boolean;
   onToggleSelectAll?: (event: unknown) => void;
   table?: Table<any, any>;
@@ -58,6 +59,7 @@ export function DataTableToolbar<TData extends Record<string, any>>({
   filterComponents,
   viewMode = 'table',
   onViewModeChange,
+  enableRowSelection = true,
   isAllSelected,
   onToggleSelectAll,
   table, 
@@ -98,7 +100,7 @@ export function DataTableToolbar<TData extends Record<string, any>>({
 
       {/* Acciones principales */}
       <div className="flex items-center space-x-2">
-        {onToggleSelectAll && (
+        {enableRowSelection && onToggleSelectAll && (
           <Button
             variant={isAllSelected ? "default" : "outline"}
             size="icon"
@@ -114,7 +116,7 @@ export function DataTableToolbar<TData extends Record<string, any>>({
           <div className={cn("flex items-center", viewMode === 'table' ? "md:hidden" : "")}>
             <DropdownMenu> 
               <DropdownMenuTrigger 
-                  className="h-9  border-border border  bg-background font-medium whitespace-nowrap  gap-2 p-2 rounded-[min(var(--radius-md),12px)] flex items-center justify-center"
+                  className="h-9  border-border border  bg-background font-medium text-[0.8rem] whitespace-nowrap  gap-2 p-2 rounded-[min(var(--radius-md),12px)] flex items-center justify-center"
                 >
                   {currentSortDirection === 'asc' ? (
                     <ArrowUp className="h-4 w-4 text-primary" />

@@ -9,13 +9,15 @@ i18n
   .use(initReactI18next)
   .init({
     resources: {
-      es: { translation: es },
-     // en: { translation: en }
+      es: {
+        // Si es.json ya tiene { "datatable": { ... } }, lo dejas tal cual:
+        translation: es,
+      },
     },
-    fallbackLng: 'es', // Idioma por defecto si no se detecta o falta traducción
+    fallbackLng: 'es',
     interpolation: {
-      escapeValue: false 
-    }
+      escapeValue: false,
+    },
   });
 
 export default i18n;

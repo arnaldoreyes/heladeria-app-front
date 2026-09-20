@@ -45,9 +45,7 @@ export function DataTableBulkActions<TData>({
         {bulkActions.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger 
-                variant="default"
-                size="sm"
-                className="rounded-full px-3 md:px-4 h-8 text-xs md:text-sm gap-1.5 font-medium shadow-sm cursor-pointer"
+                className="rounded-full px-3 md:px-4 h-8 text-xs md:text-sm gap-1.5 font-medium shadow-sm cursor-pointer flex items-center justify-center"
               >
                 <Layers className="h-4 w-4 shrink-0" />
                 <span>{t('common.actions', 'Acciones')}</span>
