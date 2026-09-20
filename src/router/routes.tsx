@@ -13,7 +13,6 @@ import { AdminRoute, NotAuthenticatedRoute } from './guards/ProtectedRoutes';
 import SettingsLayout from '@/pages/settings/SettingsLayout';
 import InventoryLayout from '@/pages/inventory/InventoryLayout';
 import ProductsList from '@/pages/inventory/ProductsList';
-import CategoriesList from '@/pages/inventory/CategoryList';
 import RestockList from '@/pages/inventory/RestockList';
 import SuppliersList from '@/pages/inventory/SuppliersList';
 import ExpensesList from '@/pages/inventory/ExpensesList';
@@ -21,6 +20,7 @@ import { BusinessSettingForm } from '@/features/business/components/BusinessSett
 import PaymentMethodsView from '@/features/payment-methods/components/PaymentMethodsView';
 import ExchangeRatesForm from '@/features/exchange-rates/components/ExchangeRatesForm';
 import CustomersView from '@/features/customers/components/CustomerView';
+import CategoriesList from '@/features/categories/components/CategoriesList';
 
 // AdminPages
 
