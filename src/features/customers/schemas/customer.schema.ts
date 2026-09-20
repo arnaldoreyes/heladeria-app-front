@@ -17,7 +17,7 @@ export const customerSchema = z.object({
     .number({ invalid_type_error: 'Debe ser un número válido' })
     .min(0, 'El límite de crédito no puede ser negativo')
     .default(0),
-  is_active: z.boolean().default(true),
+  is_active: z.boolean(),
   notes: z.string().optional().nullable(),
 });
 

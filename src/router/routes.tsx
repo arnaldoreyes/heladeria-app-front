@@ -14,7 +14,7 @@ import SettingsLayout from '@/pages/settings/SettingsLayout';
 import InventoryLayout from '@/pages/inventory/InventoryLayout';
 import ProductsList from '@/pages/inventory/ProductsList';
 import RestockList from '@/pages/inventory/RestockList';
-import SuppliersList from '@/pages/inventory/SuppliersList';
+import SuppliersList from '@/features/suppliers/components/SuppliersList';
 import ExpensesList from '@/pages/inventory/ExpensesList';
 import { BusinessSettingForm } from '@/features/business/components/BusinessSettingForm';
 import PaymentMethodsView from '@/features/payment-methods/components/PaymentMethodsView';
