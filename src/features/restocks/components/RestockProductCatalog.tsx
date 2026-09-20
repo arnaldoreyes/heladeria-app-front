@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Loader2,
+  Truck, 
 } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
@@ -35,6 +36,7 @@ export interface RestockProductCatalogProps {
   isLoading?: boolean;
   onSelectProduct: (product: Product) => void;
   onAddNewProduct?: () => void;
+  onAddNewSupplier?: () => void;
   catalog?: Product;
 }
 
@@ -42,6 +44,7 @@ export function RestockProductCatalog({
   isLoading: isExternalLoading = false,
   onSelectProduct,
   onAddNewProduct,
+  onAddNewSupplier,
 }: RestockProductCatalogProps) {
   const { t } = useTranslation();
 
@@ -83,19 +86,18 @@ export function RestockProductCatalog({
 
   return (
     <div className="h-1/2 md:h-full md:col-span-6 flex flex-col min-h-0 bg-slate-50/50 dark:bg-slate-900/50 overflow-hidden">
-      {/* Control Superior: Búsqueda, Ordenamiento y Filtros */}
+      {/* Control Superior: Búsqueda, Ordenamiento, Filtros y Acciones */}
       <div className="p-2 sm:p-3 border-b bg-background space-y-2 shrink-0">
-        <div className="flex items-center gap-1.5 sm:gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-            <Input
-              placeholder={t('restock.catalog.searchPlaceholder', { defaultValue: 'Buscar por nombre o SKU...' })}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 bg-muted/30 border-muted-foreground/20 text-xs h-8 rounded-lg"
-            />
-          </div>
-
+        <div className="relative flex-1">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <Input
+            placeholder={t('restock.catalog.searchPlaceholder', { defaultValue: 'Buscar por nombre o SKU...' })}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-8 bg-muted/30 border-muted-foreground/20 text-xs h-8 rounded-lg"
+          />
+        </div>
+        <div className="flex items-center justify-end gap-1.5 sm:gap-2">
           {/* Popover de Ordenamiento */}
           <Popover>
             <PopoverTrigger className="h-9 border-border border bg-background font-medium whitespace-nowrap gap-1 rounded-[min(var(--radius-md),12px)] p-2 flex items-center justify-center cursor-pointer">
@@ -164,10 +166,26 @@ export function RestockProductCatalog({
             </PopoverContent>
           </Popover>
 
+          {/* Botón para Agregar Proveedor al vuelo */}
+          {onAddNewSupplier && (
+            <Button
+              type="button"
+              variant="outline"
+              title={t('restock.catalog.addSupplier', { defaultValue: 'Agregar proveedor' })}
+              onClick={onAddNewSupplier}
+              className="font-bold text-[10px] sm:text-xs uppercase h-8 px-2 sm:px-3 gap-1 border-slate-300 shrink-0 text-slate-700 bg-white hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+            >
+              <Truck className="w-3.5 h-3.5" />
+              <Plus className="w-2.5 h-2.5 -ml-1" />
+            </Button>
+          )}
+
+          {/* Botón para Agregar Producto al vuelo */}
           {onAddNewProduct && (
             <Button
               type="button"
               variant="outline"
+              title={t('restock.catalog.addProduct', { defaultValue: 'Agregar producto' })}
               onClick={onAddNewProduct}
               className="font-bold text-[10px] sm:text-xs uppercase h-8 px-2 sm:px-3 gap-1 border-slate-300 shrink-0 text-white bg-emerald-900 hover:bg-emerald-800"
             >

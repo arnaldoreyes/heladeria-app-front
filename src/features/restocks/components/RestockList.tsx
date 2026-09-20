@@ -14,6 +14,8 @@ import { useRestockFilterState } from '../hooks/useRestockFilterState';
 import type { Restock } from '@/interfaces/restock.interfce';
 import { ProductDialog } from '@/features/products/components/ProductDialog';
 import { useProducts } from '@/features/products/hooks/useProducts';
+import { useSuppliers } from '@/features/suppliers/hooks/useSuppliers';
+import { SupplierDialog } from '@/features/suppliers/components/SupplierDialog';
 
 
 export default function RestockList() {
@@ -36,6 +38,19 @@ export default function RestockList() {
     isSaving: isProductSaving,
     isEditing: isProductEditing,
   } = useProducts({ search: filters.debouncedSearch });
+
+  const {
+    isModalOpen: isSupplierModalOpen,
+    closeModal: closeSupplierModal,
+    openModal: openSupplierModal,
+    form: supplierForm,
+    onSubmit: onSupplierSubmit,
+    isSaving: isSupplierSaving,
+    isDirty: isSupplierDirty,
+    isEditing: isSupplierEditing,
+  } = useSuppliers();
+
+  
 
   const {
     restocks,
@@ -140,6 +155,7 @@ export default function RestockList() {
         isSaving={isRestockSaving}
         isLoadingProducts={isLoadingProducts}
         onOpenCreateProduct={openProductModal}
+        onOpenCreateSupplier={openSupplierModal}
       />
 
       <RestockDetailDialog
@@ -162,6 +178,16 @@ export default function RestockList() {
         form={productForm}
         onSubmit={onProductSubmit}
         isSaving={isProductSaving}
+      />
+
+      <SupplierDialog
+        isOpen={isSupplierModalOpen}
+        onOpenChange={(open) => !open && closeSupplierModal()}
+        isEditing={isSupplierEditing}
+        form={supplierForm}
+        onSubmit={onSupplierSubmit}
+        isSaving={isSupplierSaving}
+        isDirty={isSupplierDirty}
       />
     </div>
   );

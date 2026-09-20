@@ -34,6 +34,7 @@ export interface RestockDialogProps {
   isSaving: boolean;
   isLoadingProducts?: boolean;
   onOpenCreateProduct?: () => void;
+  onOpenCreateSupplier?: () => void;
 }
 
 export function RestockDialog({
@@ -45,6 +46,7 @@ export function RestockDialog({
   isSaving,
   isLoadingProducts = false,
   onOpenCreateProduct,
+  onOpenCreateSupplier
 }: RestockDialogProps) {
   const { t } = useTranslation();
   const { register, control, watch, setValue } = form;
@@ -230,6 +232,7 @@ export function RestockDialog({
               isLoading={isLoadingProducts}
               onSelectProduct={handleSelectProduct}
               onAddNewProduct={onOpenCreateProduct}
+              onAddNewSupplier={onOpenCreateSupplier}
             />
 
             <div className="h-1/2 md:h-full md:col-span-6 flex flex-col min-h-0 bg-background overflow-hidden">
