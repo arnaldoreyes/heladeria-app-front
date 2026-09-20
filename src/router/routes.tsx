@@ -12,7 +12,7 @@ import ErrorPage from '@/pages/errors/ErrorPage';
 import { AdminRoute, NotAuthenticatedRoute } from './guards/ProtectedRoutes';
 import SettingsLayout from '@/pages/settings/SettingsLayout';
 import InventoryLayout from '@/pages/inventory/InventoryLayout';
-import ProductsList from '@/pages/inventory/ProductsList';
+import ProductsList from '@/features/products/components/ProductsList';
 import RestockList from '@/pages/inventory/RestockList';
 import SuppliersList from '@/features/suppliers/components/SuppliersList';
 import ExpensesList from '@/pages/inventory/ExpensesList';
