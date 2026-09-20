@@ -2,14 +2,9 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-
-export interface SupplierOption {
-  id: string | number;
-  name: string;
-}
+import { useSuppliers } from '../hooks/useSuppliers';
 
 interface SupplierSelectProps {
-  suppliers?: SupplierOption[];
   value: string | number | null | undefined;
   onChange: (value: string | null) => void;
   label?: string;
@@ -22,7 +17,6 @@ interface SupplierSelectProps {
 }
 
 export function SupplierSelect({
-  suppliers = [],
   value,
   onChange,
   label,
@@ -34,6 +28,8 @@ export function SupplierSelect({
   className = '',
 }: SupplierSelectProps) {
   const { t } = useTranslation(['restocks', 'common']);
+
+  const {suppliers} = useSuppliers();
 
   const stringValue = value !== null && value !== undefined && value !== '' ? String(value) : 'ALL';
 

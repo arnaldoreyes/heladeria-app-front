@@ -6,13 +6,15 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { CategorySelect } from '@/features/categories/components/CategorySelect';
+import type { ProductFormData } from '../schemas/product.schema';
+import type { UseFormReturn } from 'react-hook-form';
 
 
 interface ProductDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
   isEditing: boolean;
-  form: any;
+  form: UseFormReturn<ProductFormData>;
   onSubmit: (e: React.FormEvent) => void;
   isSaving: boolean;
 }
@@ -63,7 +65,7 @@ export function ProductDialog({
              <CategorySelect
                 value={categoryIdValue }
                 onChange={(val) => setValue('category_id', val === 'none' ? null : val, { shouldValidate: true })}
-                error={errors.parent_id?.message}
+                error={''}
               />
             
           </div>

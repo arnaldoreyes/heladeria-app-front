@@ -55,7 +55,7 @@ export function useSuppliers(filters: SupplierQueryParams = {}) {
     defaultValues: DEFAULT_FORM_VALUES,
   });
 
-  const {formState: { isSubmitting, isDirty } } = form;
+  const { formState: { isSubmitting, isDirty } } = form;
 
   const { data: suppliersResponse, isLoading: isLoadingSuppliers } = useQuery({
     queryKey: ['suppliers', filters.search, filters.is_active, sortBy, sortOrder, page, perPage],
@@ -93,14 +93,15 @@ export function useSuppliers(filters: SupplierQueryParams = {}) {
   });
 
   const toggleStatusMutation = useMutation({
-      mutationFn: (id: string) => toggleSupplierStatusAction(id),
-      onSuccess: () => {
-        toast.success(t('suppliers.messages.status_updated', 'Estado cambiado correctamente'));
-        queryClient.invalidateQueries({ queryKey: ['payment-methods'] });
-      },
-      onError: (error: ErrorResponse) => {
-        toast.error(error?.message || t('suppliers.messages.status_error', 'Error al cambiar el estado'));
-      },
+    mutationFn: (id: string) => toggleSupplierStatusAction(id),
+    onSuccess: () => {
+      toast.success(t('suppliers.messages.status_updated', 'Estado cambiado correctamente'));
+      // CORREGIDO: Invalida la cache de proveedores
+      queryClient.invalidateQueries({ queryKey: ['suppliers'] });
+    },
+    onError: (error: ErrorResponse) => {
+      toast.error(error?.message || t('suppliers.messages.status_error', 'Error al cambiar el estado'));
+    },
   });
 
   const deleteMutation = useMutation({
@@ -134,8 +135,8 @@ export function useSuppliers(filters: SupplierQueryParams = {}) {
       toast.success(t('suppliers.messages.bulk_status_success', 'Estados actualizados exitosamente'));
       queryClient.invalidateQueries({ queryKey: ['suppliers'] });
     },
-    onError: () => {
-      toast.error(t('suppliers.messages.bulk_status_error', 'No se pudieron actualizar los estados'));
+    onError: (error: ErrorResponse) => {
+      toast.error(error?.message || t('suppliers.messages.bulk_status_error', 'No se pudieron actualizar los estados'));
     },
   });
 
@@ -164,6 +165,7 @@ export function useSuppliers(filters: SupplierQueryParams = {}) {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingSupplier(null);
+    form.reset(DEFAULT_FORM_VALUES); // CORREGIDO: Resetea el form al cerrar la modal
   };
 
   const onSubmit = form.handleSubmit((values) => saveMutation.mutate(values));
@@ -176,7 +178,7 @@ export function useSuppliers(filters: SupplierQueryParams = {}) {
     if (bulkDeleteIds.length > 0) bulkDeleteMutation.mutate(bulkDeleteIds);
   };
 
-   const handleBulkStatus = (ids: string[], is_active: boolean) => {
+  const handleBulkStatus = (ids: string[], is_active: boolean) => {
     bulkStatusMutation.mutate({ ids, is_active });
   };
 
@@ -184,7 +186,6 @@ export function useSuppliers(filters: SupplierQueryParams = {}) {
     toggleStatusMutation.mutate(id);
   };
 
-  
   const totalRecords = suppliersResponse?.meta?.total ?? 0;
   const pageCount = suppliersResponse?.meta?.last_page ?? Math.ceil(totalRecords / perPage) ?? 1;
 

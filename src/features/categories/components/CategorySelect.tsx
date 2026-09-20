@@ -2,11 +2,10 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import type { Category } from '@/interfaces/category.interface';
 import { InputError } from '@/components/form/InputError';
+import { useCategories } from '../hooks/useCategories';
 
 interface ParentCategorySelectProps {
-  categories: Category[];
   value: string | number | null | undefined;
   onChange: (value: string | null) => void;
   label?: string;
@@ -18,7 +17,6 @@ interface ParentCategorySelectProps {
 }
 
 export function CategorySelect({
-  categories,
   value,
   onChange,
   label,
@@ -29,6 +27,11 @@ export function CategorySelect({
   className = '',
 }: ParentCategorySelectProps) {
   const { t } = useTranslation(['categories', 'common']);
+
+  
+  const {
+    categories,
+  } = useCategories();
 
   const stringValue = value !== null && value !== undefined && value !== '' ? String(value) : 'none';
 

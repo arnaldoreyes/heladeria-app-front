@@ -31,24 +31,50 @@ const DEFAULT_FORM_VALUES: ProductFormData = {
   is_active: true,
 };
 
-export function useProducts(filters: ProductQueryParams = {}) {
+export function useProducts(initialFilters: ProductQueryParams = {}) {
   const { t } = useTranslation(['products', 'common']);
   const queryClient = useQueryClient();
 
+  // --- ESTADOS DE FILTROS LOCALES ---
+  const [searchQuery, setSearchQuery] = useState(initialFilters.search || '');
+  const [selectedCategory, setSelectedCategory] = useState<string>(
+    initialFilters.category_id ? String(initialFilters.category_id) : 'ALL'
+  );
+  const [stockFilter, setStockFilter] = useState<string>('ALL');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+
+  // --- PAGINACIÓN ---
   const [page, setPage] = useState<number>(1);
-  const [perPage, setPerPage] = useState<number>(10);
+  const [perPage, setPerPage] = useState<number>(12);
+
+  // --- ORDENAMIENTO (TanStack Table Compatible) ---
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: 'name', desc: false },
+  ]);
+
+  // --- ESTADOS DE ACCIONES Y MODALES ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [bulkDeleteIds, setBulkDeleteIds] = useState<string[]>([]);
   const [bulkEditIds, setBulkEditIds] = useState<string[]>([]);
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: 'name', desc: false },
-  ]);
 
-  const sortBy = sorting.length > 0 ? sorting[0].id : undefined;
+  // --- NORMALIZACIÓN DE PARÁMETROS PARA BACKEND ---
+  const rawSortBy = sorting.length > 0 ? sorting[0].id : undefined;
+  const sortBy = rawSortBy === 'cost' ? 'unit_cost_usd' : rawSortBy;
   const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : undefined;
 
+  const parsedCategoryId = selectedCategory !== 'ALL' ? selectedCategory : undefined;
+  const parsedIsActive =
+    statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : undefined;
+  const parsedWithStock =
+    stockFilter === 'true' || stockFilter === 'in_stock'
+      ? true
+      : stockFilter === 'false' || stockFilter === 'out_of_stock'
+      ? false
+      : undefined;
+
+  // --- FORMULARIO DE PRODUCTO ---
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: DEFAULT_FORM_VALUES,
@@ -56,12 +82,26 @@ export function useProducts(filters: ProductQueryParams = {}) {
 
   const { formState: { isSubmitting, isDirty } } = form;
 
-  // Query principal
-  const { data: productsResponse, isLoading: isLoadingProducts } = useQuery({
-    queryKey: ['products', filters, sortBy, sortOrder, page, perPage],
+  // --- QUERIES SERVER-SIDE ---
+  const { data: productsResponse, isLoading: isLoadingProducts, isFetching } = useQuery({
+    queryKey: [
+      'products',
+      searchQuery,
+      parsedCategoryId,
+      parsedIsActive,
+      parsedWithStock,
+      sortBy,
+      sortOrder,
+      page,
+      perPage,
+    ],
     queryFn: () =>
       getProductsAction({
-        ...filters,
+        ...initialFilters,
+        search: searchQuery || undefined,
+        category_id: parsedCategoryId,
+        is_active: parsedIsActive,
+        with_stock: parsedWithStock,
         page,
         per_page: perPage,
         sort_by: sortBy,
@@ -70,8 +110,11 @@ export function useProducts(filters: ProductQueryParams = {}) {
   });
 
   const products = productsResponse?.data || [];
+  const totalRecords = productsResponse?.meta?.total ?? 0;
+  const totalPages =
+    productsResponse?.meta?.last_page ?? Math.ceil(totalRecords / perPage) ?? 1;
 
-  // Mutación: Crear / Editar
+  // --- MUTACIONES ---
   const saveMutation = useMutation({
     mutationFn: (values: ProductFormData) => {
       if (editingProduct?.id) {
@@ -93,12 +136,10 @@ export function useProducts(filters: ProductQueryParams = {}) {
     },
   });
 
-  // Mutación: Cambiar Estado
   const toggleStatusMutation = useMutation({
     mutationFn: (id: string) => toggleProductStatusAction(id),
     onSuccess: () => {
       toast.success(t('products.messages.status_updated', 'Estado cambiado correctamente'));
-      // CORREGIDO: Invalida la query de productos, no payment-methods
       queryClient.invalidateQueries({ queryKey: ['products'] });
     },
     onError: (error: ErrorResponse) => {
@@ -106,7 +147,6 @@ export function useProducts(filters: ProductQueryParams = {}) {
     },
   });
 
-  // Mutación: Eliminar individual
   const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteProductAction(id),
     onSuccess: () => {
@@ -119,7 +159,6 @@ export function useProducts(filters: ProductQueryParams = {}) {
     },
   });
 
-  // Mutación: Eliminar masivo
   const bulkDeleteMutation = useMutation({
     mutationFn: (ids: string[]) => bulkDestroyProductsAction(ids),
     onSuccess: () => {
@@ -132,7 +171,6 @@ export function useProducts(filters: ProductQueryParams = {}) {
     },
   });
 
-  // Mutación: Actualización masiva de valores
   const bulkUpdateValuesMutation = useMutation({
     mutationFn: (payload: ProductBulkUpdateValuesPayload) => bulkUpdateValuesProductsAction(payload),
     onSuccess: () => {
@@ -145,7 +183,6 @@ export function useProducts(filters: ProductQueryParams = {}) {
     },
   });
 
-  // Mutación: Actualización masiva de estado
   const bulkStatusMutation = useMutation({
     mutationFn: ({ ids, is_active }: { ids: string[]; is_active: boolean }) =>
       bulkUpdateStatusProductsAction(ids, is_active),
@@ -158,6 +195,65 @@ export function useProducts(filters: ProductQueryParams = {}) {
     },
   });
 
+  // --- HANDLERS DE FILTROS CON RESETEO DE PAGINACIÓN ---
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setPage(1);
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setPage(1);
+  };
+
+  const handleStockFilterChange = (filter: string | null) => {
+    if (!filter) return;
+    setStockFilter(filter);
+    setPage(1);
+  };
+
+  const handleStatusFilterChange = (filter: string | null) => {
+    if (!filter) return;
+    setStatusFilter(filter);
+    setPage(1);
+  };
+
+  const handleToggleSort = (fieldId: string) => {
+    setSorting((prev) => {
+      const current = prev[0];
+      if (current && current.id === fieldId) {
+        return [{ id: fieldId, desc: !current.desc }];
+      }
+      return [{ id: fieldId, desc: false }];
+    });
+    setPage(1);
+  };
+
+  const isDefaultSort =
+    sorting.length === 1 && sorting[0].id === 'name' && !sorting[0].desc;
+
+  const hasActiveFilters =
+    selectedCategory !== 'ALL' ||
+    stockFilter !== 'ALL' ||
+    statusFilter !== 'ALL' ||
+    searchQuery !== '' ||
+    !isDefaultSort;
+
+  const handleResetFilters = () => {
+    setSelectedCategory('ALL');
+    setStockFilter('ALL');
+    setStatusFilter('ALL');
+    setSearchQuery('');
+    setSorting([{ id: 'name', desc: false }]);
+    setPage(1);
+  };
+
+  const handleResetSort = () => {
+    setSorting([{ id: 'name', desc: false }]);
+    setPage(1);
+  };
+
+  // --- HANDLERS DE MODALES Y ACCIONES ---
   const openModal = (product?: Product) => {
     if (product) {
       setEditingProduct(product);
@@ -182,7 +278,7 @@ export function useProducts(filters: ProductQueryParams = {}) {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingProduct(null);
-    form.reset(DEFAULT_FORM_VALUES); // Limpia estado previo y errores del form
+    form.reset(DEFAULT_FORM_VALUES);
   };
 
   const onSubmit = form.handleSubmit((values) => saveMutation.mutate(values));
@@ -209,13 +305,41 @@ export function useProducts(filters: ProductQueryParams = {}) {
     toggleStatusMutation.mutate(id);
   };
 
-  const totalRecords = productsResponse?.meta?.total ?? 0;
-  const pageCount = productsResponse?.meta?.last_page ?? Math.ceil(totalRecords / perPage) ?? 1;
-
   return {
+    // Datos
     products,
     isLoadingProducts,
+    isFetching,
 
+    // Filtros
+    searchQuery,
+    setSearchQuery: handleSearchChange,
+    selectedCategory,
+    setSelectedCategory: handleCategoryChange,
+    stockFilter,
+    setStockFilter: handleStockFilterChange,
+    statusFilter,
+    setStatusFilter: handleStatusFilterChange,
+    hasActiveFilters,
+    handleResetFilters,
+
+    // Ordenamiento
+    sorting,
+    setSorting,
+    sortField: rawSortBy || 'name',
+    sortOrder: sortOrder || 'asc',
+    handleToggleSort,
+    handleResetSort,
+
+    // Paginación
+    page,
+    setPage,
+    perPage,
+    setPerPage,
+    totalPages,
+    totalRecords,
+
+    // Modal y Formulario
     isModalOpen,
     setIsModalOpen,
     openModal,
@@ -226,11 +350,13 @@ export function useProducts(filters: ProductQueryParams = {}) {
     isDirty,
     isEditing: !!editingProduct,
 
+    // Acciones de eliminación
     deletingId,
     setDeletingId,
     confirmDelete,
     isDeleting: deleteMutation.isPending,
 
+    // Acciones masivas
     bulkDeleteIds,
     setBulkDeleteIds,
     confirmBulkDelete,
@@ -242,17 +368,8 @@ export function useProducts(filters: ProductQueryParams = {}) {
     handleBulkUpdateValues,
     isBulkUpdatingValues: bulkUpdateValuesMutation.isPending,
 
+    // Cambio de estado individual
     handleToggleStatus,
     isTogglingStatus: toggleStatusMutation.isPending,
-
-    sorting,
-    setSorting,
-
-    page,
-    setPage,
-    perPage,
-    setPerPage,
-    pageCount,
-    totalRecords,
   };
 }

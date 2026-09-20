@@ -41,7 +41,6 @@ export function CategoryDialog({
   onSubmit,
   isSaving,
   isDirty,
-  parentCategories,
 }: CategoryDialogProps) {
   const { t } = useTranslation(['categories', 'common']);
   const { register, setValue, watch, formState: { errors } } = form;
@@ -146,7 +145,6 @@ export function CategoryDialog({
 
           {/* Selector de Categorías Reutilizable */}
           <CategorySelect
-            categories={parentCategories}
             value={parentIdValue}
             onChange={(val) => setValue('parent_id', val, { shouldValidate: true, shouldDirty: true })}
             error={errors.parent_id?.message}
