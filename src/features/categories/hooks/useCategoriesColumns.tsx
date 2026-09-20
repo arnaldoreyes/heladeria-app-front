@@ -39,7 +39,9 @@ export function useCategoriesColumns({ onEdit, onDelete }: UseCategoriesColumnsP
         accessorKey: 'parent.name',
         enableSorting: false,
         meta: { title: t('categories.parent', 'Categoría Padre')},
-        header: t('categories.parent', 'Categoría Padre'),
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t('categories.parent', 'Categoría Padre')} />
+        ),
         cell: ({ row }) => {
           const parentName = row.original.parent?.name;
           return (

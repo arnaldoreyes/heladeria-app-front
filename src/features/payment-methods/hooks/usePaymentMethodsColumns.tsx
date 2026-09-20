@@ -56,7 +56,10 @@ export function usePaymentMethodsColumns({
         id: 'type.name',
         accessorKey: 'type.name',
         meta: { title: t('settings.payments.type', 'Tipo de Pago') },
-        header: t('settings.payments.type', 'Tipo de Pago'),
+        //enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={t('settings.payments.type', 'Tipo de Pago')} />
+        ),
         cell: ({ row }) => {
           const typeName = row.original.type?.name;
           return (
@@ -70,9 +73,11 @@ export function usePaymentMethodsColumns({
       // Nueva Columna QR
       {
         id: 'qr',
-        header: t('settings.payments.qr', 'QR'),
         meta: { title: t('settings.payments.qr', 'QR') },
         enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={ t('settings.payments.qr', 'QR')} />
+        ),
         cell: ({ row }) => {
           const method = row.original;
           const hasQr = Boolean(method.qr_code_url || method.account_number || method.id_document);
@@ -97,9 +102,11 @@ export function usePaymentMethodsColumns({
       // Columna Estado con el Switch integrado
       {
         accessorKey: 'is_active',
-        header: t('common.status', 'Estado'),
         meta: { title: t('common.status', 'Estado') },
         enableSorting: false,
+        header: ({ column }) => (
+          <DataTableColumnHeader column={column} title={ t('common.status', 'Estado')} />
+        ),
         cell: ({ row }) => {
           const method = row.original;
           return (

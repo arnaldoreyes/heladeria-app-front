@@ -38,7 +38,7 @@ export function PaymentMethodFilters({
   const selectedTypeLabel = selectedPaymentType?.name;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 w-full items-end gap-3">
+    <div className="w-full items-end gap-3">
       {/* Filtro por Tipo de Pago */}
       <div className="space-y-1.5">
         <Label>{t('settings.payments.payment_type', 'Tipo de Pago')}</Label>

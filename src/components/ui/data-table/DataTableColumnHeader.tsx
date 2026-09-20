@@ -12,7 +12,7 @@ export function DataTableColumnHeader({
   title,
 }: DataTableColumnHeaderProps) {
   if (!column.getCanSort()) {
-    return <span>{title}</span>;
+    return <span className='text-[0.8rem]'>{title}</span>;
   }
 
   const isSorted = column.getIsSorted();

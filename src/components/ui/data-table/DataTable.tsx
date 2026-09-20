@@ -5,6 +5,7 @@ import {
   rowSelectionFeature,
   rowSortingFeature,
   useTable,
+  flexRender,
   type RowSelectionState,
   type ColumnDef,
   type OnChangeFn,
@@ -39,7 +40,6 @@ declare module '@tanstack/react-table' {
 }
 
 interface DataTableProps<TData extends Record<string, any>> {
-  // Ajuste clave: Permitir que ColumnDef acepte tanto las features de v9 como TData
   columns: ColumnDef<typeof features, TData>[]
   data: TData[]
   isLoading?: boolean
@@ -73,7 +73,7 @@ interface DataTableProps<TData extends Record<string, any>> {
   renderGridCard?: (row: any) => React.ReactNode
 }
 
-// 3. Añadir el constraint `extends Record<string, any>` al componente genérico
+// 3. Componente DataTable con genérico TData
 export function DataTable<TData extends Record<string, any>>({
   columns,
   data,
@@ -110,7 +110,7 @@ export function DataTable<TData extends Record<string, any>>({
         rowSelection,
         ...(sorting ? { sorting } : {}),
       },
-      enableRowSelection: true,
+      enableRowSelection,
       manualSorting: true,
       onRowSelectionChange: setRowSelection,
       onSortingChange,
@@ -168,7 +168,11 @@ export function DataTable<TData extends Record<string, any>>({
         ) : table.getRowModel().rows?.length ? (
           table.getRowModel().rows.map((row) => (
             <div key={row.id} className="relative h-full">
-              {renderGridCard ? renderGridCard(row) : <DefaultGridCard row={row} enableRowSelection={enableRowSelection} />}
+              {renderGridCard ? (
+                renderGridCard(row)
+              ) : (
+                <DefaultGridCard row={row} enableRowSelection={enableRowSelection} />
+              )}
             </div>
           ))
         ) : (
@@ -191,9 +195,12 @@ export function DataTable<TData extends Record<string, any>>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
-                    {header.isPlaceholder ? null : (
-                      <table.FlexRender header={header} />
-                    )}
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -218,7 +225,10 @@ export function DataTable<TData extends Record<string, any>>({
                 >
                   {row.getAllCells().map((cell) => (
                     <TableCell key={cell.id}>
-                      <table.FlexRender cell={cell} />
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>

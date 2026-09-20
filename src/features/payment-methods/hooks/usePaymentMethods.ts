@@ -36,7 +36,6 @@ export function usePaymentMethods(filters: PaymentMethodQueryParams = {}) {
   const { t } = useTranslation(['settings', 'common']);
   const queryClient = useQueryClient();
 
-  // --- 1. ESTADOS LOCALES ---
   const [page, setPage] = useState<number>(1);
   const [perPage, setPerPage] = useState<number>(10);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -45,11 +44,9 @@ export function usePaymentMethods(filters: PaymentMethodQueryParams = {}) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [bulkDeleteIds, setBulkDeleteIds] = useState<string[]>([]);
 
-  // Guardamos un fingerprint de los filtros para resetear la página en render si cambian
   const { search, currency, is_active, payment_type_id } = filters;
   const [prevFilters, setPrevFilters] = useState({ search, currency, is_active, payment_type_id });
 
-  // Si los filtros cambiaron desde el último render, ajustamos el estado inmediatamente (sin useEffect)
   if (
     prevFilters.search !== search ||
     prevFilters.currency !== currency ||
@@ -61,7 +58,6 @@ export function usePaymentMethods(filters: PaymentMethodQueryParams = {}) {
     setBulkDeleteIds([]);
   }
 
-  // Wrappers de estado para resetear selecciones al cambiar de página
   const handleSetPage = (newPage: number | ((prev: number) => number)) => {
     setPage(newPage);
     setBulkDeleteIds([]);
@@ -73,7 +69,6 @@ export function usePaymentMethods(filters: PaymentMethodQueryParams = {}) {
     setBulkDeleteIds([]);
   };
 
-  // Estado de Ordenamiento
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'name', desc: false },
   ]);
@@ -81,7 +76,6 @@ export function usePaymentMethods(filters: PaymentMethodQueryParams = {}) {
   const sortBy = sorting.length > 0 ? sorting[0].id : undefined;
   const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : undefined;
 
-  // --- 2. FORMULARIO ---
   const form = useForm<PaymentMethodFormData>({
     resolver: zodResolver(paymentMethodSchema),
     defaultValues: DEFAULT_FORM_VALUES,
@@ -90,7 +84,6 @@ export function usePaymentMethods(filters: PaymentMethodQueryParams = {}) {
   const {formState: { isSubmitting, isDirty } } = form;
 
 
-  // --- 3. QUERIES ---
   const { data: methodsResponse, isLoading: isLoadingMethods, isFetching } = useQuery({
     queryKey: ['payment-methods', { search, currency, is_active, payment_type_id, sortBy, sortOrder, page, perPage }],
     queryFn: () =>
@@ -118,12 +111,10 @@ export function usePaymentMethods(filters: PaymentMethodQueryParams = {}) {
   const totalRecords = methodsResponse?.meta?.total ?? 0;
   const pageCount = methodsResponse?.meta?.last_page ?? 1;
 
-  // Ajuste síncrono de página si excede el límite tras borrados
   if (page > pageCount && pageCount > 0) {
     setPage(pageCount);
   }
 
-  // --- 4. MUTACIONES ---
   const saveMutation = useMutation({
     mutationFn: (values: PaymentMethodFormData) => {
       if (editingMethod?.id) {
@@ -189,7 +180,6 @@ export function usePaymentMethods(filters: PaymentMethodQueryParams = {}) {
     },
   });
 
-  // --- 5. HANDLERS ---
   const openModal = (method?: PaymentMethod) => {
     if (method) {
       setEditingMethod(method);
@@ -235,7 +225,6 @@ export function usePaymentMethods(filters: PaymentMethodQueryParams = {}) {
     bulkStatusMutation.mutate({ ids, is_active });
   };
 
-  // --- 6. RETORNO ---
   return {
     methods,
     paymentTypes,
