@@ -23,19 +23,16 @@ export default function InventoryLayout() {
     },
     { 
       path: '/admin/inventory/restocks', 
-      label: t('inventory.nav.restocks', 'Reabastecimientos'), 
+      label: t('inventory.nav.restocks', 'Reposiciones'), 
       icon: ShoppingCart 
     },
+    /*
       { 
       path: '/admin/inventory/expenses', 
       label: t('inventory.nav.exponse', 'Gastos'), 
       icon: Receipt
     },
-    { 
-      path: '/admin/inventory/history', 
-      label: t('inventory.nav.history', 'Movimientos'), 
-      icon: ArrowRightLeft 
-    },
+    */
   ];
 
   return (
