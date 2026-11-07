@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type { SortingState } from '@tanstack/react-table';
 import { productSchema, type ProductFormData } from '../schemas/product.schema';
 import type { ErrorResponse } from '@/interfaces/api.interface';
 import { 
@@ -18,6 +17,7 @@ import {
   updateProductAction,
 } from '../actions/product.action';
 import type { Product, ProductBulkUpdateValuesPayload, ProductQueryParams } from '@/interfaces/product.interface';
+import { useProductFilters } from './useProductFiltersOptions';
 
 const DEFAULT_FORM_VALUES: ProductFormData = {
   sku: '',
@@ -29,52 +29,25 @@ const DEFAULT_FORM_VALUES: ProductFormData = {
   min_stock_alert: 0,
   image: '',
   is_active: true,
+  tags: [],
 };
 
 export function useProducts(initialFilters: ProductQueryParams = {}) {
   const { t } = useTranslation(['products', 'common']);
   const queryClient = useQueryClient();
 
-  // --- ESTADOS DE FILTROS LOCALES ---
-  const [searchQuery, setSearchQuery] = useState(initialFilters.search || '');
-  const [selectedCategory, setSelectedCategory] = useState<string>(
-    initialFilters.category_id ? String(initialFilters.category_id) : 'ALL'
-  );
-  const [stockFilter, setStockFilter] = useState<string>('ALL');
-  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+  // 1. Consumimos toda la lógica de filtrado, paginación y ordenamiento
+  const filters = useProductFilters(initialFilters);
 
-  // --- PAGINACIÓN ---
-  const [page, setPage] = useState<number>(1);
-  const [perPage, setPerPage] = useState<number>(12);
-
-  // --- ORDENAMIENTO (TanStack Table Compatible) ---
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: 'name', desc: false },
-  ]);
-
-  // --- ESTADOS DE ACCIONES Y MODALES ---
+  // 2. Estados locales exclusivos de modales y acciones de productos
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [bulkDeleteIds, setBulkDeleteIds] = useState<string[]>([]);
   const [bulkEditIds, setBulkEditIds] = useState<string[]>([]);
+  const [isFetchingForCopy] = useState(false);
 
-  // --- NORMALIZACIÓN DE PARÁMETROS PARA BACKEND ---
-  const rawSortBy = sorting.length > 0 ? sorting[0].id : undefined;
-  const sortBy = rawSortBy === 'cost' ? 'unit_cost_usd' : rawSortBy;
-  const sortOrder = sorting.length > 0 ? (sorting[0].desc ? 'desc' : 'asc') : undefined;
-
-  const parsedCategoryId = selectedCategory !== 'ALL' ? selectedCategory : undefined;
-  const parsedIsActive =
-    statusFilter === 'active' ? true : statusFilter === 'inactive' ? false : undefined;
-  const parsedWithStock =
-    stockFilter === 'true' || stockFilter === 'in_stock'
-      ? true
-      : stockFilter === 'false' || stockFilter === 'out_of_stock'
-      ? false
-      : undefined;
-
-  // --- FORMULARIO DE PRODUCTO ---
+  // 3. Formulario de producto (React Hook Form)
   const form = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: DEFAULT_FORM_VALUES,
@@ -82,37 +55,29 @@ export function useProducts(initialFilters: ProductQueryParams = {}) {
 
   const { formState: { isSubmitting, isDirty } } = form;
 
-  // --- QUERIES SERVER-SIDE ---
+  // 4. Queries Server-Side usando los parámetros centralizados del hook de filtros
   const { data: productsResponse, isLoading: isLoadingProducts, isFetching } = useQuery({
-    queryKey: [
-      'products',
-      searchQuery,
-      parsedCategoryId,
-      parsedIsActive,
-      parsedWithStock,
-      sortBy,
-      sortOrder,
-      page,
-      perPage,
-    ],
-    queryFn: () =>
-      getProductsAction({
-        ...initialFilters,
-        search: searchQuery || undefined,
-        category_id: parsedCategoryId,
-        is_active: parsedIsActive,
-        with_stock: parsedWithStock,
-        page,
-        per_page: perPage,
-        sort_by: sortBy,
-        sort_order: sortOrder,
-      }),
+    queryKey: ['products', filters.queryParams],
+    queryFn: () => getProductsAction(filters.queryParams),
   });
+
+  // 5. Función para obtener productos para el diálogo o exportación
+  const fetchCategoryProducts = async () => {
+    const response = await getProductsAction({
+      categories: filters.queryParams.categories,
+      tags: filters.queryParams.tags,
+      is_active: 'true',
+      with_stock: 'true',
+      sort_by: 'price_usd',
+      per_page: -1, 
+    });
+    return response?.data || [];
+  };
 
   const products = productsResponse?.data || [];
   const totalRecords = productsResponse?.meta?.total ?? 0;
   const totalPages =
-    productsResponse?.meta?.last_page ?? Math.ceil(totalRecords / perPage) ?? 1;
+    productsResponse?.meta?.last_page ?? Math.ceil(totalRecords / filters.perPage) ?? 1;
 
   // --- MUTACIONES ---
   const saveMutation = useMutation({
@@ -195,64 +160,6 @@ export function useProducts(initialFilters: ProductQueryParams = {}) {
     },
   });
 
-  // --- HANDLERS DE FILTROS CON RESETEO DE PAGINACIÓN ---
-  const handleSearchChange = (query: string) => {
-    setSearchQuery(query);
-    setPage(1);
-  };
-
-  const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category);
-    setPage(1);
-  };
-
-  const handleStockFilterChange = (filter: string | null) => {
-    if (!filter) return;
-    setStockFilter(filter);
-    setPage(1);
-  };
-
-  const handleStatusFilterChange = (filter: string | null) => {
-    if (!filter) return;
-    setStatusFilter(filter);
-    setPage(1);
-  };
-
-  const handleToggleSort = (fieldId: string) => {
-    setSorting((prev) => {
-      const current = prev[0];
-      if (current && current.id === fieldId) {
-        return [{ id: fieldId, desc: !current.desc }];
-      }
-      return [{ id: fieldId, desc: false }];
-    });
-    setPage(1);
-  };
-
-  const isDefaultSort =
-    sorting.length === 1 && sorting[0].id === 'name' && !sorting[0].desc;
-
-  const hasActiveFilters =
-    selectedCategory !== 'ALL' ||
-    stockFilter !== 'ALL' ||
-    statusFilter !== 'ALL' ||
-    searchQuery !== '' ||
-    !isDefaultSort;
-
-  const handleResetFilters = () => {
-    setSelectedCategory('ALL');
-    setStockFilter('ALL');
-    setStatusFilter('ALL');
-    setSearchQuery('');
-    setSorting([{ id: 'name', desc: false }]);
-    setPage(1);
-  };
-
-  const handleResetSort = () => {
-    setSorting([{ id: 'name', desc: false }]);
-    setPage(1);
-  };
-
   // --- HANDLERS DE MODALES Y ACCIONES ---
   const openModal = (product?: Product) => {
     if (product) {
@@ -267,6 +174,7 @@ export function useProducts(initialFilters: ProductQueryParams = {}) {
         min_stock_alert: product.min_stock_alert ?? 0,
         image: product.image || '',
         is_active: product.is_active ?? true,
+        tags: product.tags ? product.tags.map(t => t.id) : [],
       });
     } else {
       setEditingProduct(null);
@@ -306,36 +214,20 @@ export function useProducts(initialFilters: ProductQueryParams = {}) {
   };
 
   return {
-    // Datos
+    // Datos de la query
     products,
     isLoadingProducts,
     isFetching,
 
-    // Filtros
-    searchQuery,
-    setSearchQuery: handleSearchChange,
-    selectedCategory,
-    setSelectedCategory: handleCategoryChange,
-    stockFilter,
-    setStockFilter: handleStockFilterChange,
-    statusFilter,
-    setStatusFilter: handleStatusFilterChange,
-    hasActiveFilters,
-    handleResetFilters,
+    // Exponemos todas las propiedades y métodos del hook de filtros directamente
+    ...filters,
 
-    // Ordenamiento
-    sorting,
-    setSorting,
-    sortField: rawSortBy || 'name',
-    sortOrder: sortOrder || 'asc',
-    handleToggleSort,
-    handleResetSort,
+    // Copiar catálogo a WhatsApp
+    handleCopyWhatsAppCatalog: async () => {},
+    isFetchingForCopy,
+    fetchCategoryProducts,
 
-    // Paginación
-    page,
-    setPage,
-    perPage,
-    setPerPage,
+    // Paginación calculada
     totalPages,
     totalRecords,
 
@@ -350,11 +242,13 @@ export function useProducts(initialFilters: ProductQueryParams = {}) {
     isDirty,
     isEditing: !!editingProduct,
 
-    // Acciones de eliminación
+    // Acciones de eliminación e individuales
     deletingId,
     setDeletingId,
     confirmDelete,
     isDeleting: deleteMutation.isPending,
+    handleToggleStatus,
+    isTogglingStatus: toggleStatusMutation.isPending,
 
     // Acciones masivas
     bulkDeleteIds,
@@ -362,14 +256,9 @@ export function useProducts(initialFilters: ProductQueryParams = {}) {
     confirmBulkDelete,
     isBulkDeleting: bulkDeleteMutation.isPending,
     handleBulkStatus,
-
     bulkEditIds,
     setBulkEditIds,
     handleBulkUpdateValues,
     isBulkUpdatingValues: bulkUpdateValuesMutation.isPending,
-
-    // Cambio de estado individual
-    handleToggleStatus,
-    isTogglingStatus: toggleStatusMutation.isPending,
   };
 }

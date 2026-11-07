@@ -3,10 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useSuppliers } from '../hooks/useSuppliers';
+import { Plus, Truck } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface SupplierSelectProps {
   value: string | number | null | undefined;
   onChange: (value: string | null) => void;
+  onAddNewSupplier?: () => void;
   label?: string;
   placeholder?: string;
   noneOptionLabel?: string;
@@ -19,6 +22,7 @@ interface SupplierSelectProps {
 export function SupplierSelect({
   value,
   onChange,
+  onAddNewSupplier,
   label,
   placeholder,
   noneOptionLabel,
@@ -29,7 +33,7 @@ export function SupplierSelect({
 }: SupplierSelectProps) {
   const { t } = useTranslation(['restocks', 'common']);
 
-  const {suppliers} = useSuppliers();
+  const { suppliers } = useSuppliers();
 
   const stringValue = value !== null && value !== undefined && value !== '' ? String(value) : 'ALL';
 
@@ -44,28 +48,48 @@ export function SupplierSelect({
   return (
     <div className={`space-y-2 ${className}`}>
       {defaultLabel && <Label>{defaultLabel}</Label>}
-      <Select
-        value={stringValue}
-        onValueChange={(val) => onChange(val === 'ALL' ? null : val)}
-        disabled={disabled}
-      >
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder={defaultPlaceholder}>
-            {selectedSupplier ? selectedSupplier.name : defaultNoneLabel}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {showNoneOption && (
-            <SelectItem value="ALL">{defaultNoneLabel}</SelectItem>
-          )}
-          {suppliers.map((sup) => (
-            <SelectItem key={sup.id} value={String(sup.id)}>
-              {sup.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      {error && <p className="text-xs text-destructive">{error}</p>}
+      
+      {/* Contenedor flexible en línea */}
+      <div className="flex items-start gap-2 w-full">
+        <div className="flex-1">
+          <Select
+            value={stringValue}
+            onValueChange={(val) => onChange(val === 'ALL' ? null : val)}
+            disabled={disabled}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={defaultPlaceholder}>
+                {selectedSupplier ? selectedSupplier.name : defaultNoneLabel}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {showNoneOption && (
+                <SelectItem value="ALL">{defaultNoneLabel}</SelectItem>
+              )}
+              {suppliers.map((sup) => (
+                <SelectItem key={sup.id} value={String(sup.id)}>
+                  {sup.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+        </div>
+
+        {/* Botón alineado a la derecha del Select */}
+        {onAddNewSupplier && (
+          <Button
+            type="button"
+            variant="outline"
+            title={t('restock.catalog.addSupplier', { defaultValue: 'Agregar proveedor' })}
+            onClick={onAddNewSupplier}
+            className=""
+          >
+            <Truck className="w-3.5 h-3.5" />
+            <Plus className="w-2.5 h-2.5 -ml-1" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 }

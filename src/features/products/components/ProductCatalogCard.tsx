@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { formatUsd } from '@/lib/format';
 import type { Product } from '@/interfaces/product.interface';
 
-interface RestockProductCardProps {
+interface ProductCatalogCardProp {
   product: Product;
   onSelect: (product: Product) => void;
 }
@@ -14,10 +14,10 @@ const getStockBorderClass = (stock: number, minStock = 5) => {
   return 'border-border';
 };
 
-export const RestockProductCard = memo(function RestockProductCard({
+export const ProductCatalogCard = memo(function ProductCatalogCard({
   product,
   onSelect,
-}: RestockProductCardProps) {
+}: ProductCatalogCardProp) {
   const { t } = useTranslation();
   const currentStock = product.stock ?? 0;
   const minStockThreshold = product.min_stock_alert ?? 5;
@@ -33,7 +33,7 @@ export const RestockProductCard = memo(function RestockProductCard({
       </span>
       <div className="flex items-center justify-between text-[9px] sm:text-[11px] mt-1 pt-1 border-t border-slate-100 dark:border-slate-800">
         <span className="text-muted-foreground font-medium">
-          {t('restock.catalog.stockAbbr', { defaultValue: 'Stock' })}: {currentStock}
+          {t('catalog.stockAbbr', { defaultValue: 'Stock' })}: {currentStock}
         </span>
         <span className="font-extrabold text-slate-900 dark:text-slate-100">
           {formatUsd(product.cost_usd || 0)}

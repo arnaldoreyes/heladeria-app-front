@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   tableFeatures,
@@ -49,6 +49,7 @@ interface DataTableProps<TData extends Record<string, any>> {
     pageCount: number
     total?: number
   }
+  actions?: ReactNode
   onPageChange?: (page: number) => void
   onPageSizeChange?: (pageSize: number) => void
   searchValue?: string
@@ -96,6 +97,7 @@ export function DataTable<TData extends Record<string, any>>({
   onSortingChange,
   defaultViewMode = 'table',
   renderGridCard,
+  actions
 }: DataTableProps<TData>) {
   const { t } = useTranslation('datatable')
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
@@ -139,6 +141,7 @@ export function DataTable<TData extends Record<string, any>>({
         isAllSelected={table.getIsAllPageRowsSelected()}
         onToggleSelectAll={table.getToggleAllPageRowsSelectedHandler()}
         enableRowSelection={enableRowSelection}
+        actions={actions}
         table={table}
       />
 
@@ -153,8 +156,8 @@ export function DataTable<TData extends Record<string, any>>({
         className={cn(
           'grid gap-4',
           viewMode === 'table'
-            ? 'grid-cols-1 md:hidden'
-            : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
+            ? 'grid-cols-2 md:hidden'
+            : 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
         )}
       >
         {isLoading ? (

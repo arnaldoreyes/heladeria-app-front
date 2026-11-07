@@ -9,8 +9,7 @@ import {
   ArrowDown,
   ChevronLeft,
   ChevronRight,
-  Loader2,
-  Truck, 
+  Loader2
 } from 'lucide-react';
 
 import { Input } from '@/components/ui/input';
@@ -18,20 +17,20 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
-import { RestockProductCard } from './RestockProductCard';
 import { ProductFilters } from '@/features/products/components/ProductFilters';
 import type { Product } from '@/interfaces/product.interface';
 import type { Category } from '@/interfaces/category.interface';
 import { useProducts } from '@/features/products/hooks/useProducts';
+import { ProductCatalogCard } from './ProductCatalogCard';
 
 const SORT_OPTIONS = [
-  { id: 'name', labelKey: 'restock.catalog.sort.fields.name', defaultLabel: 'Nombre' },
-  { id: 'sku', labelKey: 'restock.catalog.sort.fields.sku', defaultLabel: 'SKU' },
-  { id: 'cost_usd', labelKey: 'restock.catalog.sort.fields.costUsd', defaultLabel: 'Precio (USD)' },
-  { id: 'stock', labelKey: 'restock.catalog.sort.fields.stock', defaultLabel: 'Stock' },
+  { id: 'name', labelKey: 'product.catalog.sort.fields.name', defaultLabel: 'Nombre' },
+  { id: 'sku', labelKey: 'product.catalog.sort.fields.sku', defaultLabel: 'SKU' },
+  { id: 'cost_usd', labelKey: 'product.catalog.sort.fields.costUsd', defaultLabel: 'Precio (USD)' },
+  { id: 'stock', labelKey: 'product.catalog.sort.fields.stock', defaultLabel: 'Stock' },
 ] as const;
 
-export interface RestockProductCatalogProps {
+export interface ProductCatalogProps {
   categories?: Category[];
   isLoading?: boolean;
   onSelectProduct: (product: Product) => void;
@@ -40,13 +39,13 @@ export interface RestockProductCatalogProps {
   catalog?: Product;
 }
 
-export function RestockProductCatalog({
+export function ProductCatalog({
   isLoading: isExternalLoading = false,
   onSelectProduct,
-  onAddNewProduct,
-  onAddNewSupplier,
-}: RestockProductCatalogProps) {
+  onAddNewProduct
+}: ProductCatalogProps) {
   const { t } = useTranslation();
+  
 
   // Invocación del Hook Unificado
   const {
@@ -54,44 +53,54 @@ export function RestockProductCatalog({
     isLoadingProducts,
     searchQuery,
     setSearchQuery,
-    selectedCategory,
-    setSelectedCategory,
     stockFilter,
     setStockFilter,
+    tagsFilter,
+    setTagsFilter,
+    categoriesFilter,
+    setCategoriesFilter,
     statusFilter,
     setStatusFilter,
     hasActiveFilters,
     handleResetFilters,
-    sortField,
-    sortOrder,
-    handleToggleSort,
-    handleResetSort,
     page,
     setPage,
     perPage,
     totalPages,
     totalRecords,
-  } = useProducts();
+    categoryOptions,
+    tagOptions,
+    tags,
+    categories,
+    sortField,
+    sortOrder,
+    handleToggleSort,
+    handleResetSort,
+  } = useProducts( {
+    is_active: 'true',
+    with_stock: 'true',
+  });
+  
 
   const isLoading = isExternalLoading || isLoadingProducts;
 
   const currentSortLabel =
     sortField === 'name'
-      ? t('restock.catalog.sort.fields.name', { defaultValue: 'Nombre' })
+      ? t('product.catalog.sort.fields.name', { defaultValue: 'Nombre' })
       : sortField === 'sku'
-      ? t('restock.catalog.sort.fields.sku', { defaultValue: 'SKU' })
+      ? t('product.catalog.sort.fields.sku', { defaultValue: 'SKU' })
       : sortField === 'cost_usd' || sortField === 'unit_cost_usd' || sortField === 'cost'
-      ? t('restock.catalog.sort.fields.price', { defaultValue: 'Precio' })
-      : t('restock.catalog.sort.fields.stock', { defaultValue: 'Stock' });
+      ? t('product.catalog.sort.fields.price', { defaultValue: 'Precio' })
+      : t('product.catalog.sort.fields.stock', { defaultValue: 'Stock' });
 
   return (
-    <div className="h-1/2 md:h-full md:col-span-6 flex flex-col min-h-0 bg-slate-50/50 dark:bg-slate-900/50 overflow-hidden">
+    <div className="md:col-span-6 flex flex-col min-h-0 bg-slate-50/50 dark:bg-slate-900/50 h-full">
       {/* Control Superior: Búsqueda, Ordenamiento, Filtros y Acciones */}
       <div className="p-2 sm:p-3 border-b bg-background space-y-2 shrink-0">
         <div className="relative flex-1">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
           <Input
-            placeholder={t('restock.catalog.searchPlaceholder', { defaultValue: 'Buscar por nombre o SKU...' })}
+            placeholder={t('product.catalog.searchPlaceholder', { defaultValue: 'Buscar por nombre o SKU...' })}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-8 bg-muted/30 border-muted-foreground/20 text-xs h-8 rounded-lg"
@@ -106,7 +115,7 @@ export function RestockProductCatalog({
             </PopoverTrigger>
             <PopoverContent align="end" sideOffset={8} className="w-[calc(100vw-32px)] sm:w-80 p-4 space-y-3">
               <div className="text-xs font-semibold text-muted-foreground px-2 py-1">
-                {t('restock.catalog.sort.title', { defaultValue: 'Ordenar por' })}
+                {t('product.catalog.sort.title', { defaultValue: 'Ordenar por' })}
               </div>
               <div className="space-y-0.5">
                 {SORT_OPTIONS.map((item) => {
@@ -141,7 +150,7 @@ export function RestockProductCatalog({
                   className="w-full text-center text-[11px] text-muted-foreground hover:text-foreground py-1 flex items-center justify-center gap-1"
                 >
                   <RotateCcw className="w-3 h-3" />
-                  <span>{t('restock.catalog.sort.reset', { defaultValue: 'Restablecer orden' })}</span>
+                  <span>{t('product.catalog.sort.reset', { defaultValue: 'Restablecer orden' })}</span>
                 </Button>
               </div>
             </PopoverContent>
@@ -154,38 +163,28 @@ export function RestockProductCatalog({
             </PopoverTrigger>
             <PopoverContent align="end" sideOffset={8} className="w-[calc(100vw-32px)] sm:w-80 p-4 space-y-3">
               <ProductFilters
-                categoryFilter={selectedCategory}
-                onCategoryChange={(v) => v && setSelectedCategory(v)}
-                activeFilter={statusFilter}
+                categoriesFilter={categoriesFilter}
+                onCategoriesChange={(v) => v && setCategoriesFilter(v)}
+                activeFilter={statusFilter ?? 'ALL'}
                 onActiveChange={(v) => v && setStatusFilter(v)}
-                stockFilter={stockFilter}
+                stockFilter={stockFilter ?? 'ALL'}
                 onStockChange={(v) => v && setStockFilter(v)}
                 onReset={handleResetFilters}
                 isResetDisabled={!hasActiveFilters}
+                tagsFilter={tagsFilter}
+                onTagsChange={(v) => v && setTagsFilter(v)}
+
               />
             </PopoverContent>
           </Popover>
 
-          {/* Botón para Agregar Proveedor al vuelo */}
-          {onAddNewSupplier && (
-            <Button
-              type="button"
-              variant="outline"
-              title={t('restock.catalog.addSupplier', { defaultValue: 'Agregar proveedor' })}
-              onClick={onAddNewSupplier}
-              className="font-bold text-[10px] sm:text-xs uppercase h-8 px-2 sm:px-3 gap-1 border-slate-300 shrink-0 text-slate-700 bg-white hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
-            >
-              <Truck className="w-3.5 h-3.5" />
-              <Plus className="w-2.5 h-2.5 -ml-1" />
-            </Button>
-          )}
 
           {/* Botón para Agregar Producto al vuelo */}
           {onAddNewProduct && (
             <Button
               type="button"
               variant="outline"
-              title={t('restock.catalog.addProduct', { defaultValue: 'Agregar producto' })}
+              title={t('product.catalog.addProduct', { defaultValue: 'Agregar producto' })}
               onClick={onAddNewProduct}
               className="font-bold text-[10px] sm:text-xs uppercase h-8 px-2 sm:px-3 gap-1 border-slate-300 shrink-0 text-white bg-emerald-900 hover:bg-emerald-800"
             >
@@ -207,13 +206,13 @@ export function RestockProductCatalog({
         ) : products.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 text-center p-2">
             <p className="text-xs font-semibold text-muted-foreground">
-              {t('restock.catalog.noProducts', { defaultValue: 'Sin productos encontrados' })}
+              {t('product.catalog.noProducts', { defaultValue: 'Sin productos encontrados' })}
             </p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pb-2">
             {products.map((prod: Product) => (
-              <RestockProductCard key={prod.id} product={prod} onSelect={onSelectProduct} />
+              <ProductCatalogCard key={prod.id} product={prod} onSelect={onSelectProduct} />
             ))}
           </div>
         )}

@@ -1,6 +1,5 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useDebounce } from 'use-debounce';
 import { Trash2, CheckCircle, XCircle, Plus, Edit3 } from 'lucide-react';
 
 import { DataTable } from '@/components/ui/data-table/DataTable';
@@ -12,17 +11,12 @@ import { ProductGridCard } from './ProductGridCard';
 import { ProductFilters } from './ProductFilters';
 import { useActiveExchangeRate } from '@/features/exchange-rates/hooks/useActiveExchangeRate';
 import { BulkUpdateValuesDialog } from './BulkUpdateProductValuesDialog';
+import { ShareCategoryCatalogDialog } from './ShareCategoryCatalogDialog';
 
 export default function ProductsList() {
   const { t } = useTranslation(['products', 'common']);
 
   // Estados de Filtros
-  const [searchValue, setSearchValue] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('ALL');
-  const [activeFilter, setActiveFilter] = useState('ALL');
-  const [stockFilter, setStockFilter] = useState('ALL');
-
-  const [debouncedSearch] = useDebounce(searchValue, 500);
   const { currentRate } = useActiveExchangeRate();
 
   const {
@@ -34,7 +28,6 @@ export default function ProductsList() {
     form,
     onSubmit,
     isSaving,
-    isDirty,
     isEditing,
     deletingId,
     setDeletingId,
@@ -52,25 +45,31 @@ export default function ProductsList() {
     setPage,
     perPage,
     setPerPage,
-    pageCount,
+    totalPages,
     totalRecords,
     bulkEditIds,
     setBulkEditIds,
     handleBulkUpdateValues,
     isBulkUpdatingValues,
+    searchQuery,
+    setSearchQuery,
+    categoryOptions,
+    tagOptions,
+    stockFilter,
+    setStockFilter,
+    tagsFilter,
+    setTagsFilter,
+    categoriesFilter,
+    setCategoriesFilter,
+    statusFilter,
+    setStatusFilter,
+    hasActiveFilters,
+    handleResetFilters,
+    fetchCategoryProducts,
   } = useProducts({
-    search: debouncedSearch,
-    category_id: categoryFilter !== 'ALL' ? categoryFilter : undefined,
-    is_active: activeFilter !== 'ALL' ? activeFilter === 'active' : undefined,
-    with_stock: stockFilter !== 'ALL' ? stockFilter === 'true' : undefined,
+    with_stock: 'true',
+    is_active: 'true',
   });
-
-  const handleResetFilters = useCallback(() => {
-    setSearchValue('');
-    setStockFilter('ALL');
-    setActiveFilter('ALL');
-    setCategoryFilter('ALL');
-  }, []);
 
   const columns = useProductsColumns({
     onEdit: openModal,
@@ -82,6 +81,7 @@ export default function ProductsList() {
     (selectedRows: any[]) => selectedRows.map((row) => row.id || row.original?.id),
     []
   );
+
 
   const bulkActions = useMemo(
     () => [
@@ -110,12 +110,6 @@ export default function ProductsList() {
     [getRealIds, handleBulkStatus, setBulkDeleteIds, setBulkEditIds, t]
   );
 
-  const isResetDisabled =
-    searchValue === '' &&
-    activeFilter === 'ALL' &&
-    stockFilter === 'ALL' &&
-    categoryFilter === 'ALL';
-
   return (
     <div className="space-y-4">
       <DataTable
@@ -125,22 +119,33 @@ export default function ProductsList() {
         showSearch={true}
         showAdd={true}
         showFilters={true}
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
         searchPlaceholder={t('products.search_placeholder', 'Buscar productos por nombre o SKU...')}
         onAdd={() => openModal()}
         addLabel={t('products.add_button', 'Nuevo Producto')}
         addIcon={<Plus className="mr-2 h-4 w-4" />}
         filterComponents={
           <ProductFilters
-            categoryFilter={categoryFilter}
-            onCategoryChange={(v) => v && setCategoryFilter(v)}
-            activeFilter={activeFilter}
-            onActiveChange={(v) => v && setActiveFilter(v)}
-            stockFilter={stockFilter}
-            onStockChange={(v) => v && setStockFilter(v)}
-            onReset={handleResetFilters}
-            isResetDisabled={isResetDisabled}
+                categoryOptions={categoryOptions}
+                tagOptions={tagOptions}
+                categoriesFilter={categoriesFilter}
+                onCategoriesChange={(v) => v && setCategoriesFilter(v)}
+                activeFilter={statusFilter ?? 'ALL'}
+                onActiveChange={(v) => v && setStatusFilter(v)}
+                stockFilter={stockFilter ?? 'ALL'}
+                onStockChange={(v) => v && setStockFilter(v)}
+                onReset={handleResetFilters}
+                isResetDisabled={!hasActiveFilters}
+                tagsFilter={tagsFilter}
+                onTagsChange={(v) => v && setTagsFilter(v)}
+
+              />
+        }
+        actions={          
+          <ShareCategoryCatalogDialog
+            categoryName={'Productos'}
+            fetchCategoryProducts={ fetchCategoryProducts}
           />
         }
         sorting={sorting}
@@ -159,7 +164,7 @@ export default function ProductsList() {
         pagination={{
           pageIndex: page,
           pageSize: perPage,
-          pageCount,
+          pageCount: totalPages,
           total: totalRecords,
         }}
         onPageChange={setPage}
@@ -168,6 +173,7 @@ export default function ProductsList() {
           setPage(1);
         }}
       />
+    
 
       <ProductDialog
         isOpen={isModalOpen}
@@ -176,6 +182,8 @@ export default function ProductsList() {
         form={form}
         onSubmit={onSubmit}
         isSaving={isSaving}
+        selectedTags={tagsFilter}
+        setSelectedTags={setTagsFilter}
       />
 
       <ConfirmDeleteDialog

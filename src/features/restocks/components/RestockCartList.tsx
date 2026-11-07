@@ -24,7 +24,7 @@ export function RestockCartList({
   }, [fields.length]);
 
   return (
-    <div className="h-1/2 md:h-full md:col-span-6 flex flex-col min-h-0 bg-background overflow-hidden">
+    <div className="md:col-span-6 flex flex-col min-h-0 bg-background overflow-hidden">
       {/* Header del Carrito */}
       <div className="px-3 py-1.5 bg-muted/40 border-b flex items-center justify-between text-[11px] font-bold text-muted-foreground uppercase tracking-wider shrink-0">
         <span className="flex items-center gap-1 text-slate-800 dark:text-slate-200">

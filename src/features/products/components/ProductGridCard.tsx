@@ -26,6 +26,12 @@ export interface CategoryData {
   reinvestment_percentage?: number | null;
 }
 
+export interface TagData {
+  id: string;
+  name: string;
+  color?: string | null;
+}
+
 export interface ProductItemData {
   id: string;
   business_id?: string;
@@ -41,6 +47,7 @@ export interface ProductItemData {
   min_stock_alert?: number;
   is_low_stock?: boolean;
   category?: CategoryData | string | null;
+  tags?: TagData[] | string[];
   created_at?: string;
   updated_at?: string;
 }
@@ -111,7 +118,7 @@ export function ProductGridCard<TData>({
     <Card
       onClick={() => onClick?.(product)}
       className={cn(
-        'relative h-full group cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between border overflow-hidden bg-card p-3 rounded-2xl',
+        'relative h-full group cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md hover:-translate-y-0.5 flex flex-col justify-between border overflow-hidden bg-card p-2.5 sm:p-3 rounded-2xl w-full',
         isOutOfStock && 'border-red-400',
         !isOutOfStock && isLowStock && 'border-amber-400',
         !isOutOfStock &&
@@ -124,33 +131,31 @@ export function ProductGridCard<TData>({
       {/* SECCIÓN SUPERIOR: HERO / IMAGEN / ICONO */}
       <div
         className={cn(
-          'relative w-full h-40 rounded-xl border flex items-center justify-center overflow-hidden p-3 transition-colors duration-200',
+          'relative w-full h-36 sm:h-40 rounded-xl border flex items-center justify-center overflow-hidden p-2 sm:p-3 transition-colors duration-200',
           heroBgStyle
         )}
       >
         <div
-          className="absolute top-3 left-3 z-10"
+          className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10"
           onClick={(e) => e.stopPropagation()}
         >
           <Checkbox
             checked={isSelected}
             onCheckedChange={(checked) => row.toggleSelected(!!checked)}
             aria-label="Seleccionar producto"
-            className="bg-background/80 backdrop-blur-sm data-[state=checked]:bg-primary h-5 w-5 rounded-md border-muted-foreground/40 cursor-pointer"
+            className="bg-background/80 backdrop-blur-sm data-[state=checked]:bg-primary h-4 w-4 sm:h-5 sm:w-5 rounded-md border-muted-foreground/40 cursor-pointer"
           />
         </div>
 
-        {/* Badge de Estado + Toggle Switch + Menú Opciones */}
+        {/* Badge de Estado + Menú Opciones */}
         <div
-          className="absolute top-3 right-3 z-10 flex items-center gap-1.5"
+          className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 z-10 flex items-center gap-1 sm:gap-1.5"
           onClick={(e) => e.stopPropagation()}
         >
-          
-
           <Badge
             variant={isActive ? 'outline' : 'destructive'}
             className={cn(
-              'text-[10px] px-2 py-0.5 font-medium backdrop-blur-sm',
+              'text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 font-medium backdrop-blur-sm',
               isActive
                 ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-700 dark:text-emerald-400'
                 : 'bg-destructive/10 text-destructive border-destructive/30'
@@ -167,7 +172,7 @@ export function ProductGridCard<TData>({
                 <MoreVertical className="h-4 w-4" />
                 <span className="sr-only">{t('common.actions', 'Acciones')}</span>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-44 sm:w-48">
               {onToggleStatus && product.id && (
                 <>
                   <DropdownMenuItem
@@ -215,7 +220,7 @@ export function ProductGridCard<TData>({
                   {t('common.delete', 'Eliminar')}
                 </DropdownMenuItem>
               )}
-            </DropdownMenuContent>
+              </DropdownMenuContent>
             </DropdownMenu>
           )}
         </div>
@@ -230,7 +235,7 @@ export function ProductGridCard<TData>({
         ) : categoryIcon ? (
           <span
             className={cn(
-              'material-symbols-outlined text-4xl select-none transition-transform duration-200 group-hover:scale-110',
+              'material-symbols-outlined text-3xl sm:text-4xl select-none transition-transform duration-200 group-hover:scale-110',
               iconColorStyle
             )}
           >
@@ -239,79 +244,109 @@ export function ProductGridCard<TData>({
         ) : (
           <Package
             className={cn(
-              'w-10 h-10 transition-transform duration-200 group-hover:scale-110',
+              'w-8 h-8 sm:w-10 sm:h-10 transition-transform duration-200 group-hover:scale-110',
               iconColorStyle
             )}
           />
         )}
       </div>
 
-      {/* DETALLES: CATEGORÍA, NOMBRE Y STOCK */}
-      <CardContent className="p-1 pt-3 space-y-1.5 flex-1 flex flex-col justify-between">
-        <div>
+      {/* DETALLES: CATEGORÍA, NOMBRE, TAGS Y STOCK */}
+      <CardContent className="p-1 pt-2 sm:pt-3 space-y-1.5 flex-1 flex flex-col justify-between">
+        <div className="space-y-1">
           {/* Nombre de la Categoría */}
           {categoryName && (
-            <div className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-0.5">
-              <Tag className="w-3 h-3 text-muted-foreground/70" />
+            <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-muted-foreground uppercase tracking-wider">
+              <Tag className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-muted-foreground/70 shrink-0" />
               <span className="truncate">{categoryName}</span>
             </div>
           )}
 
           {/* Nombre del Producto */}
           <h3
-            className="text-base font-bold text-foreground tracking-tight leading-snug line-clamp-2 uppercase group-hover:text-primary transition-colors duration-150"
+            className="text-sm sm:text-base font-bold text-foreground tracking-tight leading-snug line-clamp-2 uppercase group-hover:text-primary transition-colors duration-150"
             title={product.name}
           >
             {product.name}
           </h3>
 
-          {/* Stock */}
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
-            <span className="font-semibold tracking-wider text-[11px]">
-              Stock:
-            </span>
-            <span
-              className={cn(
-                'font-bold text-sm',
-                isOutOfStock
-                  ? 'text-red-600 dark:text-red-400'
-                  : isLowStock
-                  ? 'text-amber-600 dark:text-amber-400'
-                  : 'text-foreground'
-              )}
-            >
-              {stock}
-            </span>
-          </div>
+          {/* Renderizado de Tags */}
+          {product.tags && product.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 pt-0.5">
+              {product.tags.map((tag, index) => {
+                const tagName = typeof tag === 'object' ? tag.name : tag;
+                const tagColor = typeof tag === 'object' ? tag.color : null;
 
-          {/* Costo USD */}
-          <div className="text-xs text-muted-foreground font-medium pb-0.5">
-            Costo Unitario:{' '}
-            <span
-              className={cn(
-                'font-bold text-sm',
-                isOutOfStock
-                  ? 'text-red-600 dark:text-red-400'
-                  : isLowStock
-                  ? 'text-amber-600 dark:text-amber-400'
-                  : 'text-foreground'
-              )}
-            >
-              ${Number(costUsd).toFixed(2)}
-            </span>
+                return (
+                  <span
+                    key={typeof tag === 'object' ? tag.id : index}
+                    style={tagColor ? { backgroundColor: `${tagColor}20`, color: tagColor, borderColor: `${tagColor}40` } : undefined}
+                    className={cn(
+                      "text-[9px] sm:text-[10px] px-1.5 py-0.5 rounded-md font-medium border inline-flex items-center gap-1 max-w-full truncate",
+                      !tagColor && "bg-secondary text-secondary-foreground border-border"
+                    )}
+                  >
+                    {tagColor && (
+                      <span 
+                        className="w-1.5 h-1.5 rounded-full shrink-0 inline-block" 
+                        style={{ backgroundColor: tagColor }} 
+                      />
+                    )}
+                    <span className="truncate">{tagName}</span>
+                  </span>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Stock y Costo */}
+          <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 text-xs text-muted-foreground pt-1">
+            <div className="flex items-center gap-1">
+              <span className="font-semibold tracking-wider text-[10px] sm:text-[11px]">
+                Stock:
+              </span>
+              <span
+                className={cn(
+                  'font-bold text-xs sm:text-sm',
+                  isOutOfStock
+                    ? 'text-red-600 dark:text-red-400'
+                    : isLowStock
+                    ? 'text-amber-600 dark:text-amber-400'
+                    : 'text-foreground'
+                )}
+              >
+                {stock}
+              </span>
+            </div>
+
+            <div className="text-[11px] sm:text-xs font-medium">
+              Costo:{' '}
+              <span
+                className={cn(
+                  'font-bold text-xs sm:text-sm',
+                  isOutOfStock
+                    ? 'text-red-600 dark:text-red-400'
+                    : isLowStock
+                    ? 'text-amber-600 dark:text-amber-400'
+                    : 'text-foreground'
+                )}
+              >
+                ${Number(costUsd).toFixed(2)}
+              </span>
+            </div>
           </div>
         </div>
 
         {/* PIE DE PÁGINA: PRECIOS */}
-        <div className="pt-2">
-          <div className="h-[1px] w-full bg-border/60 mb-2.5" />
+        <div className="pt-2 mt-auto">
+          <div className="h-[1px] w-full bg-border/60 mb-2" />
 
           <div className="flex items-end justify-between">
-            <div className="flex flex-col">
-              <span className="text-xl font-black text-teal-700 dark:text-teal-400 leading-none">
+            <div className="flex flex-col min-w-0">
+              <span className="text-lg sm:text-xl font-black text-teal-700 dark:text-teal-400 leading-none truncate">
                 ${Number(priceUsd).toFixed(2)}
               </span>
-              <span className="text-xs font-semibold text-muted-foreground mt-1">
+              <span className="text-[11px] sm:text-xs font-semibold text-muted-foreground mt-1 truncate">
                 {Number(priceBs).toLocaleString('es-VE', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,

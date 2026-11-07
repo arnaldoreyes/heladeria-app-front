@@ -10,13 +10,15 @@ import {
   CheckCircle2,
   ArrowRight,
   Loader2,
+  ShoppingCart,
+  LayoutGrid
 } from 'lucide-react';
 
 import { Dialog, DialogContent, DialogTitle, DialogHeader } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'; // 👈 Importante para el modo colapsable en móvil
 
-import { RestockProductCatalog } from './RestockProductCatalog';
 import { RestockCartList } from './RestockCartList';
 import { ExchangeRateToggle } from './ExchangeRateToggle';
 
@@ -24,6 +26,7 @@ import { useRestockExchangeRate } from '../hooks/useRestockExchangeRate';
 import { SupplierSelect } from '@/features/suppliers/components/SupplierSelect';
 import type { RestockFormData } from '../schemas/restock.schema';
 import type { Product } from '@/interfaces/product.interface';
+import { ProductCatalog } from '@/features/products/components/ProductCatalog';
 
 export interface RestockDialogProps {
   isOpen: boolean;
@@ -51,6 +54,9 @@ export function RestockDialog({
   const { t } = useTranslation();
   const { register, control, watch, setValue } = form;
   const [submitMode, setSubmitMode] = useState<'draft' | 'completed'>('completed');
+  
+  // Estado para controlar la pestaña activa en dispositivos móviles
+  const [mobileTab, setMobileTab] = useState<'catalog' | 'cart'>('catalog');
 
   const { fields, append, remove } = useFieldArray({ control, name: 'items' });
 
@@ -85,26 +91,31 @@ export function RestockDialog({
     );
   }, [items, exchangeRate]);
 
+  // Contar cantidad total de productos en el carrito para mostrar un badge indicador
+  const totalItemsCount = useMemo(() => {
+    return items.reduce((acc, item) => acc + (Number(item.quantity) || 0), 0);
+  }, [items]);
+
   const updateQuantity = useCallback(
-  (index: number, delta: number) => {
-    const currentItem = items[index];
-    if (!currentItem) return;
+    (index: number, delta: number) => {
+      const currentItem = items[index];
+      if (!currentItem) return;
 
-    const currentQty = Number(currentItem.quantity) || 0;
-    const newQty = Math.max(1, currentQty + delta);
-    const costUsd = Number(currentItem.unit_cost_usd) || 0;
+      const currentQty = Number(currentItem.quantity) || 0;
+      const newQty = Math.max(1, currentQty + delta);
+      const costUsd = Number(currentItem.unit_cost_usd) || 0;
 
-    setValue(`items.${index}.quantity`, newQty, {
-      shouldDirty: true,
-      shouldTouch: true,
-      shouldValidate: true,
-    });
-    setValue(`items.${index}.unit_cost_bs`, costUsd * exchangeRate, {
-      shouldDirty: true,
-    });
-  },
-  [items, exchangeRate, setValue]
-);
+      setValue(`items.${index}.quantity`, newQty, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
+      setValue(`items.${index}.unit_cost_bs`, costUsd * exchangeRate, {
+        shouldDirty: true,
+      });
+    },
+    [items, exchangeRate, setValue]
+  );
 
   const handleSelectProduct = useCallback(
     (product: Product) => {
@@ -114,7 +125,6 @@ export function RestockDialog({
         const currentItem = items[existingIndex];
         const newQty = (Number(currentItem?.quantity) || 0) + 1;
         setValue(`items.${existingIndex}.quantity`, newQty, { shouldDirty: true });
-        
       } else {
         const costUsd = product.cost_usd || 0;
         append({
@@ -133,7 +143,6 @@ export function RestockDialog({
     e.preventDefault();
     setSubmitMode(mode);
 
-    // Mapeo e inyección limpia de totales consolidados al form
     const updatedItems = items.map((item) => {
       const qty = Number(item.quantity) || 1;
       const costUsd = Number(item.unit_cost_usd) || 0;
@@ -160,7 +169,7 @@ export function RestockDialog({
   };
 
   const dialogTitle = isEditing
-    ? t('restock.dialog.editTitle', { defaultValue: 'Editar Reposicion' })
+    ? t('restock.dialog.editTitle', { defaultValue: 'Editar Reposición' })
     : t('restock.dialog.title', { defaultValue: 'Reposición' });
 
   return (
@@ -174,7 +183,6 @@ export function RestockDialog({
           
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-4 px-3 sm:px-6 py-2.5 sm:py-3 border-b bg-card shrink-0">
-            {/* Sección izquierda: Título e ícono */}
             <div className="flex items-center gap-2 min-w-0">
               <PackagePlus className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-800 dark:text-emerald-400 shrink-0" />
               <h2 className="text-xs sm:text-base font-bold uppercase tracking-wider text-emerald-950 dark:text-emerald-400 truncate">
@@ -182,7 +190,6 @@ export function RestockDialog({
               </h2>
             </div>
 
-            {/* Sección derecha: Toggle y Botón Vaciar */}
             <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
               <ExchangeRateToggle
                 currentFormRate={exchangeRate}
@@ -210,6 +217,7 @@ export function RestockDialog({
             <div className="gap-2 flex-1">
               <SupplierSelect
                 value={supplierId === 'ALL' ? null : supplierId}
+                onAddNewSupplier={onOpenCreateSupplier}
                 onChange={(val) => {
                   setValue('supplier_id', val, { shouldValidate: true, shouldDirty: true });
                 }}
@@ -226,16 +234,136 @@ export function RestockDialog({
             </div>
           </div>
 
-          {/* Cuerpo Dividido */}
-          <div className="flex flex-col md:grid md:grid-cols-12 flex-1 min-h-0 overflow-hidden divide-y md:divide-y-0 md:divide-x border-b">
-            <RestockProductCatalog
+          {/* --- CUERPO RESPONSIVO (Colapsable con Tabs en Móvil / Dividido en Escritorio) --- */}
+          
+          {/* 1. Versión Móvil: Sistema de pestañas colapsables */}
+          <div className="flex flex-col flex-1 min-h-0 overflow-hidden md:hidden">
+            <Tabs value={mobileTab} onValueChange={(v) => setMobileTab(v as 'catalog' | 'cart')} className="flex flex-col h-full w-full">
+              
+              {/* Barra de Pestañas Móviles */}
+              <div className="px-3 py-2 bg-muted/30 border-b shrink-0">
+                <TabsList className="grid grid-cols-2 h-9 w-full">
+                  <TabsTrigger value="catalog" className="text-xs font-bold gap-1.5">
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span>Catálogo</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="cart" className="text-xs font-bold gap-1.5 relative">
+                    <ShoppingCart className="w-3.5 h-3.5" />
+                    <span>Carrito</span>
+                    {totalItemsCount > 0 && (
+                      <span className="ml-1 px-1.5 py-0.5 text-[10px] bg-emerald-600 text-white rounded-full font-black">
+                        {totalItemsCount}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+
+              {/* Contenido Pestaña Catálogo */}
+              <TabsContent value="catalog" className="flex-1 min-h-0 m-0 overflow-hidden data-[state=active]:flex flex-col">
+                <ProductCatalog
+                  isLoading={isLoadingProducts}
+                  onSelectProduct={(p) => {
+                    handleSelectProduct(p);
+                    // Opcional: pasar al carrito automáticamente al agregar un producto en móvil
+                    // setMobileTab('cart');
+                  }}
+                  onAddNewProduct={onOpenCreateProduct}
+                />
+              </TabsContent>
+
+              {/* Contenido Pestaña Carrito y Totales */}
+              <TabsContent value="cart" className="flex-1 min-h-0 m-0 overflow-hidden data-[state=active]:flex flex-col bg-background">
+                <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+                  <RestockCartList
+                    fields={fields}
+                    items={items}
+                    register={register}
+                    setValue={setValue}
+                    control={control}
+                    remove={remove}
+                    updateQuantity={updateQuantity}
+                    exchangeRate={exchangeRate}
+                  />
+
+                  {/* Totales y Acciones Móvil */}
+                  <div className="p-2 sm:p-3 border-t bg-slate-50 dark:bg-slate-900 space-y-2 shrink-0 z-10 shadow-lg">
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex-1 flex items-center justify-between bg-card border px-2.5 py-1 rounded-lg shadow-sm">
+                        <span className="font-extrabold text-xs text-emerald-800 dark:text-emerald-400">$</span>
+                        <span className="font-black text-sm text-emerald-950 dark:text-emerald-400">
+                          {totals.totalUsd.toFixed(2)}
+                        </span>
+                      </div>
+
+                      <ArrowUpDown className="w-3 h-3 text-muted-foreground shrink-0 rotate-90" />
+
+                      <div className="flex-1 flex items-center justify-between bg-card border px-2.5 py-1 rounded-lg shadow-sm">
+                        <span className="font-black text-sm text-slate-800 dark:text-slate-100 truncate">
+                          {totals.totalBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </span>
+                        <span className="font-extrabold text-[10px] text-muted-foreground">Bs</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-1.5">
+                      <Button
+                        type="button"
+                        disabled={isSaving || fields.length === 0}
+                        onClick={(e) => handleFormSubmit(e, 'draft')}
+                        variant="outline"
+                        size="sm"
+                      >
+                        {isSaving && submitMode === 'draft' ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <FileText className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                        )}
+                        <span className="truncate">{t('common.actions.save', { defaultValue: 'Guardar' })}</span>
+                      </Button>
+
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={isSaving || fields.length === 0}
+                        onClick={(e) => handleFormSubmit(e, 'completed')}
+                        className="bg-emerald-900 hover:bg-emerald-800"
+                      >
+                        {isSaving && submitMode === 'completed' ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <>
+                            {isEditing ? (
+                              <>
+                                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                                <span className="truncate">{t('common.actions.save', { defaultValue: 'Guardar' })}</span>
+                              </>
+                            ) : (
+                              <>
+                                <span className="truncate">{t('restock.dialog.actions.checkout', { defaultValue: 'Facturar' })}</span>
+                                <ArrowRight className="w-3.5 h-3.5 shrink-0" />
+                              </>
+                            )}
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+            </Tabs>
+          </div>
+
+          {/* 2. Versión Escritorio (md en adelante): Mantiene el diseño original dividido lado a lado */}
+          <div className="hidden md:grid md:grid-cols-12 flex-1 min-h-0 divide-x border-b">
+            <ProductCatalog
               isLoading={isLoadingProducts}
               onSelectProduct={handleSelectProduct}
               onAddNewProduct={onOpenCreateProduct}
-              onAddNewSupplier={onOpenCreateSupplier}
             />
 
-            <div className="h-1/2 md:h-full md:col-span-6 flex flex-col min-h-0 bg-background overflow-hidden">
+            <div className="h-full md:col-span-6 flex flex-col min-h-0 bg-background ">
               <RestockCartList
                 fields={fields}
                 items={items}
@@ -247,20 +375,20 @@ export function RestockDialog({
                 exchangeRate={exchangeRate}
               />
 
-              {/* Totales y Acciones */}
-              <div className="p-2 sm:p-3 border-t bg-slate-50 dark:bg-slate-900 space-y-2 shrink-0 z-10 shadow-lg">
+              {/* Totales y Acciones Escritorio */}
+              <div className="p-3 border-t bg-slate-50 dark:bg-slate-900 space-y-2 shrink-0 z-10 shadow-lg">
                 <div className="flex items-center gap-1.5">
-                  <div className="flex-1 flex items-center justify-between bg-card border px-2.5 py-1 sm:py-1.5 rounded-lg shadow-sm">
+                  <div className="flex-1 flex items-center justify-between bg-card border px-2.5 py-1.5 rounded-lg shadow-sm">
                     <span className="font-extrabold text-xs text-emerald-800 dark:text-emerald-400">$</span>
-                    <span className="font-black text-sm sm:text-base text-emerald-950 dark:text-emerald-400">
+                    <span className="font-black text-base text-emerald-950 dark:text-emerald-400">
                       {totals.totalUsd.toFixed(2)}
                     </span>
                   </div>
 
                   <ArrowUpDown className="w-3 h-3 text-muted-foreground shrink-0 rotate-90" />
 
-                  <div className="flex-1 flex items-center justify-between bg-card border px-2.5 py-1 sm:py-1.5 rounded-lg shadow-sm">
-                    <span className="font-black text-sm sm:text-base text-slate-800 dark:text-slate-100 truncate">
+                  <div className="flex-1 flex items-center justify-between bg-card border px-2.5 py-1.5 rounded-lg shadow-sm">
+                    <span className="font-black text-base text-slate-800 dark:text-slate-100 truncate">
                       {totals.totalBs.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </span>
                     <span className="font-extrabold text-[10px] text-muted-foreground">Bs</span>
@@ -310,6 +438,7 @@ export function RestockDialog({
               </div>
             </div>
           </div>
+
         </form>
       </DialogContent>
     </Dialog>

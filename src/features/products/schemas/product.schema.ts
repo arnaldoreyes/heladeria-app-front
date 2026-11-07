@@ -23,6 +23,7 @@ export const productSchema = z.object({
     .default(0),
   image: z.string().nullable().optional(),
   is_active: z.boolean(),
+  tags: z.array(z.string()).optional(), // <-- Agregado para aceptar las etiquetas seleccionadas
 });
 
 const optionalNumber = z.preprocess(

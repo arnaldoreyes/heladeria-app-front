@@ -72,6 +72,7 @@ export default function CategoriesList() {
         showAdd={true}
         showFilters={false}
         searchValue={searchValue}
+        defaultViewMode="grid"
         onSearchChange={setSearchValue}
         searchPlaceholder={t('categories.search_placeholder', 'Buscar categorías...')}
         onAdd={() => openModal()}

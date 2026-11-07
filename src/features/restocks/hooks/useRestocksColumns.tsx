@@ -33,22 +33,12 @@ export function useRestocksColumns({
         cell: ({ row }) => (
           <div className="font-medium font-mono text-xs">
             {row.original.invoice_number ?? '-'}
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'supplier_name',
-        enableSorting: false,
-        meta: { title: t('restocks.supplier_name', 'Proveedor') },
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t('restocks.supplier_name', 'Proveedor')} />
-        ),
-        cell: ({ row }) => (
-          <div className="font-medium">
+            <br />
             {row.original.supplier_name ?? 'N/A'}
           </div>
         ),
       },
+      
       {
         accessorKey: 'user',
         enableSorting: false,
@@ -78,16 +68,6 @@ export function useRestocksColumns({
                 : t('common.draft', 'Cotizado')}
             </Badge>
           );
-        },
-      },
-       {
-        accessorKey: 'quantity',
-        meta: { title: t('restocks.quantity', 'Cantidad') },
-        header: ({ column }) => (
-          <DataTableColumnHeader column={column} title={t('restocks.quantity', 'Cantidad')} />
-        ),
-        cell: ({ row }) => {
-          return <div className="font-medium text-center">{row.original.quantity}</div>;
         },
       },
       {

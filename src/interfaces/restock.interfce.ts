@@ -8,6 +8,10 @@ export interface RestockItem {
   quantity: number;
   unit_cost_usd: number;
   unit_cost_bs: number;
+
+  sale_price_usd: number;
+  sale_price_bs: number;
+  original_cost: number;
   subtotal_usd: number;
   subtotal_bs: number;
 }

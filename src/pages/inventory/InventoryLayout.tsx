@@ -1,4 +1,4 @@
-import { Store, Tags, ShoppingCart, ArrowRightLeft, Users, Receipt } from 'lucide-react';
+import { Store, Tags, ShoppingCart, ArrowRightLeft, Users, Receipt, Tag, LayoutGrid } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TabbedLayout, type NavItem } from '@/components/layout/TabbedLayout';
 
@@ -14,6 +14,11 @@ export default function InventoryLayout() {
     { 
       path: '/admin/inventory/categories', 
       label: t('inventory.nav.categories', 'Categorías'), 
+      icon: LayoutGrid 
+    },
+    { 
+      path: '/admin/inventory/tags', 
+      label: t('inventory.nav.tags', 'Etiquetas'), 
       icon: Tags 
     },
     { 

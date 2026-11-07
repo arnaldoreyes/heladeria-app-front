@@ -34,6 +34,8 @@ interface DataTableToolbarProps<TData extends Record<string, any>> {
   addLabel?: string;
   addIcon?: ReactNode;
 
+  actions?: ReactNode;
+
   showFilters?: boolean;
   filterComponents?: ReactNode;
   
@@ -54,6 +56,7 @@ export function DataTableToolbar<TData extends Record<string, any>>({
   showAdd = false,
   onAdd,
   addLabel,
+  actions,
   addIcon = <Plus className="h-4 w-4" />,
   showFilters = false,
   filterComponents,
@@ -233,6 +236,8 @@ export function DataTableToolbar<TData extends Record<string, any>>({
           </Popover>
         )}
 
+        {actions}
+
         {/* Botón Agregar */}
         {showAdd && onAdd && (  
           <Button onClick={onAdd} variant="default" size="sm" className="h-9 flex items-center justify-center">
@@ -242,6 +247,8 @@ export function DataTableToolbar<TData extends Record<string, any>>({
             </span>
           </Button>
         )}
+
+        
       </div>
     </div>
   );

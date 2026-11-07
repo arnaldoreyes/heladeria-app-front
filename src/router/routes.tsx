@@ -15,12 +15,16 @@ import InventoryLayout from '@/pages/inventory/InventoryLayout';
 import ProductsList from '@/features/products/components/ProductsList';
 import RestockList from '@/features/restocks/components/RestockList';
 import SuppliersList from '@/features/suppliers/components/SuppliersList';
-import ExpensesList from '@/pages/inventory/ExpensesList';
+//import ExpensesList from '@/pages/inventory/ExpensesList';
 import { BusinessSettingForm } from '@/features/business/components/BusinessSettingForm';
 import PaymentMethodsView from '@/features/payment-methods/components/PaymentMethodsView';
 import ExchangeRatesForm from '@/features/exchange-rates/components/ExchangeRatesForm';
 import CustomersView from '@/features/customers/components/CustomerView';
 import CategoriesList from '@/features/categories/components/CategoriesList';
+import SalesLayout from '@/pages/sales/SalesLayout';
+import SalesHistoryList from '@/features/sales/history/components/SalesHistoryList'
+import SalesView from '@/features/sales/pos/components/SalesView'
+import TagsList from '@/features/tags/components/TagList';
 
 // AdminPages
 
@@ -62,11 +66,11 @@ export const router = createBrowserRouter([
       // Ventas y Clientes
       { 
         path: 'sales', 
-        Component: InventoryLayout, 
+        Component: SalesLayout, 
         children: [
-          {  index: true,  Component: /* SalesList */ () => <div>Ventas</div> },
-          { path: 'history', Component: /* InventoryMovements */ () => <div>Ventas</div> },
-          { path: 'customers', Component: /* CustomersList */ () => <div>Clientes</div> },
+          { path: 'pos',  Component: SalesView },
+          { path: 'history', Component: SalesHistoryList },
+          { path: 'customers', Component: CustomersView },      
         ]
       },
      
@@ -77,11 +81,12 @@ export const router = createBrowserRouter([
         children: [
           { index: true, element: <Navigate to="products" replace /> },
           { path: 'products', Component: ProductsList },      
-          { path: 'categories', Component: CategoriesList },         
+          { path: 'categories', Component: CategoriesList },      
+          { path: 'tags', Component: TagsList },         
           { path: 'restocks', Component:  RestockList },
           { path: 'suppliers', Component:  SuppliersList },
           { path: 'history', Component: /* InventoryMovements */ () => <div>Movimientos</div> },
-          { path: 'expenses', Component:  ExpensesList},
+          //{ path: 'expenses', Component:  ExpensesList},
         ]
       },
 
@@ -92,7 +97,6 @@ export const router = createBrowserRouter([
           { path: 'general', Component: BusinessSettingForm },
           { path: 'payment-methods', Component:  PaymentMethodsView },
           { path: 'exchange-rates', Component:  ExchangeRatesForm },  
-          { path: 'customers', Component: CustomersView },      
           { path: 'users', Component: /* UsersList */ () => <div>Usuarios / Empleados</div> },           
         ]
       },

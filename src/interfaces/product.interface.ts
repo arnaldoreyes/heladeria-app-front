@@ -1,5 +1,6 @@
 import type { BaseGetFilters, SuccessResponse } from "./api.interface";
 import type { Category } from "./category.interface";
+import type { Tag } from "./tag.interface";
 
 
 export interface Product {
@@ -14,6 +15,7 @@ export interface Product {
   min_stock_alert: number;
   image: string | null;
   is_active: boolean;
+  tags?: Tag[]; 
   category?: Category | null;
   created_at?: string;
   updated_at?: string;
@@ -28,9 +30,10 @@ export interface ProductBulkUpdateValuesPayload {
 }
 
 export interface ProductQueryParams extends BaseGetFilters {
-  category_id?: string;
-  is_active?: boolean | string;
-  with_stock?: boolean;
+  categories?: string[];
+  tags?: string[];
+  is_active?: string;
+  with_stock?: string;
 }
 
 export type ProductApiResponse = SuccessResponse<Product>;
