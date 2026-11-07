@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Store, Receipt } from "lucide-react";
+import { Store, Receipt, Landmark } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -10,7 +10,6 @@ import { FormSaveButton } from "@/components/form/FormSaveButton";
 import { InputError } from "@/components/form/InputError";
 import { DistributionRulesSlider } from "@/components/custom/DistributionRulesSlider";
 import { useBusinessSetting } from "../hooks/useBusinessSetting";
-
 
 export function BusinessSettingForm() {
   const { t } = useTranslation();
@@ -81,7 +80,81 @@ export function BusinessSettingForm() {
         onChange={updateDistribution}
       />
 
-      {/* SECCIÓN 3: Facturación y Tickets */}
+      {/* SECCIÓN 3: Comisiones Bancarias (PagoMóvil) */}
+      <FormSectionCard
+        title={t("settings.business.bankingFees", "Comisiones Bancarias")}
+        description={t(
+          "settings.business.bankingFeesDesc",
+          "Configura los porcentajes y tarifas mínimas del BCV para absorción automática de gastos."
+        )}
+        icon={Landmark}
+        contentClassName="grid grid-cols-1 md:grid-cols-3 gap-6"
+      >
+        <div className="space-y-2">
+          <Label htmlFor="p2c_fee_percentage">
+            {t("settings.business.p2cFee", "Comisión P2C (%)")}
+          </Label>
+          <div className="relative">
+            <Input
+              id="p2c_fee_percentage"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="1.50"
+              {...register("settings.p2c_fee_percentage", { valueAsNumber: true })}
+            />
+            <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">%</span>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            {t("settings.business.p2cHelp", "Persona a Comercio (Ej. 1.50%)")}
+          </p>
+          <InputError message={errors.settings?.p2c_fee_percentage?.message} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="c2p_fee_percentage">
+            {t("settings.business.c2pFee", "Comisión C2P (%)")}
+          </Label>
+          <div className="relative">
+            <Input
+              id="c2p_fee_percentage"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="2.00"
+              {...register("settings.c2p_fee_percentage", { valueAsNumber: true })}
+            />
+            <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">%</span>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            {t("settings.business.c2pHelp", "Comercio a Persona / Taquilla (Ej. 2.00%)")}
+          </p>
+          <InputError message={errors.settings?.c2p_fee_percentage?.message} />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="pago_movil_min_fee_bs">
+            {t("settings.business.minFeeBs", "Tarifa Mínima (Bs)")}
+          </Label>
+          <div className="relative">
+            <Input
+              id="pago_movil_min_fee_bs"
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="14.00"
+              {...register("settings.pago_movil_min_fee_bs", { valueAsNumber: true })}
+            />
+            <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">Bs</span>
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            {t("settings.business.minFeeHelp", "Monto mínimo por transacción en bolívares")}
+          </p>
+          <InputError message={errors.settings?.pago_movil_min_fee_bs?.message} />
+        </div>
+      </FormSectionCard>
+
+      {/* SECCIÓN 4: Facturación y Tickets */}
       <FormSectionCard
         title={t("settings.business.tickets", "Tickets y Facturación")}
         description={t(
@@ -111,7 +184,7 @@ export function BusinessSettingForm() {
             id="auto-print-switch"
             checked={printTicketOnSale}
             onCheckedChange={(checked) =>
-              setValue("print_ticket_on_sale", checked, {
+              setValue("settings.print_ticket_on_sale", checked, {
                 shouldValidate: true,
                 shouldDirty: true,
               })
@@ -132,9 +205,9 @@ export function BusinessSettingForm() {
               id="ticket_header_notes"
               placeholder="Ej. RIF, Dirección de la sucursal..."
               className="resize-none min-h-[100px]"
-              {...register("ticket_header_notes")}
+              {...register("settings.ticket_header_notes")}
             />
-            <InputError message={errors.ticket_header_notes?.message} />
+            <InputError message={errors.settings?.ticket_header_notes?.message} />
           </div>
 
           <div className="space-y-2">
@@ -148,9 +221,9 @@ export function BusinessSettingForm() {
               id="ticket_footer_notes"
               placeholder="Ej. ¡Gracias por su compra! No se aceptan devoluciones..."
               className="resize-none min-h-[100px]"
-              {...register("ticket_footer_notes")}
+              {...register("settings.ticket_footer_notes")}
             />
-            <InputError message={errors.ticket_footer_notes?.message} />
+            <InputError message={errors.settings?.ticket_footer_notes?.message} />
           </div>
         </div>
       </FormSectionCard>

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { QrCode, X, Upload } from 'lucide-react';
+import { Controller } from 'react-hook-form'; // <--- Importante para controlar los Selects con RHF si no se usa setValue directo
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -35,8 +36,11 @@ export function PaymentMethodDialog({
   isDirty,
   paymentTypes = [],
 }: PaymentMethodDialogProps) {
-  const { register } = form;
+  const { register, control, watch, setValue } = form;
   const { t } = useTranslation(['settings', 'common']);
+
+  // Opcional: ver valores actuales para lógica inteligente en vivo
+  const typeDocumentValue = watch('type_document');
 
   const {
     values: { currencyValue, paymentTypeIdValue, isActiveValue, selectedPaymentType, qrPreviewUrl },
@@ -118,11 +122,78 @@ export function PaymentMethodDialog({
                   <InputError message={errors.account_number?.message} />
                 </div>
 
+                {/* --- NUEVO: TIPO DE DOCUMENTO + NÚMERO DE CÉDULA/RIF --- */}
                 <div className="col-span-2 space-y-2">
                   <Label htmlFor="id_document">{t('settings.payments.form.document', 'Cédula / RIF')}</Label>
-                  <Input id="id_document" placeholder={t('settings.payments.form.document_ph', 'Ej. V-12345678')} {...register('id_document')} />
+                  <div className="flex gap-2">
+                    <Controller
+                      name="type_document"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          value={field.value || 'V'}
+                          onValueChange={(val) => {
+                            field.onChange(val);
+                            if (val === 'J' || val === 'G') {
+                              setValue('account_type', 'juridical', { shouldDirty: true });
+                            } else if (val === 'V' || val === 'E') {
+                              setValue('account_type', 'personal', { shouldDirty: true });
+                            }
+                          }}
+                          >
+                          <SelectTrigger className="w-[100px]">
+                            <SelectValue>
+                              {field.value === 'V' && 'V'}
+                              {field.value === 'E' && 'E'}
+                              {field.value === 'J' && 'J'}
+                              {field.value === 'G' && 'G'}
+                            </SelectValue>
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="V">V - Venezolano</SelectItem>
+                            <SelectItem value="E">E - Extranjero</SelectItem>
+                            <SelectItem value="J">J - Jurídico</SelectItem>
+                            <SelectItem value="G">G - Gub.</SelectItem>
+                          </SelectContent>
+                          </Select>
+                      )}
+                    />
+                    <Input
+                      id="id_document"
+                      placeholder={typeDocumentValue === 'J' || typeDocumentValue === 'G' ? 'Ej. J-123456789' : 'Ej. 12345678'}
+                      {...register('id_document')}
+                      className="flex-1"
+                    />
+                  </div>
                   <InputError message={errors.id_document?.message} />
                 </div>
+
+                {/* --- NUEVO: ROL DE LA CUENTA (General, Reposición o Ganancias) --- */}
+                <div className="space-y-2 col-span-2">
+                  <Label>{t('settings.payments.form.role', 'Rol Financiero')}</Label>
+                  <Controller
+                    name="role"
+                    control={control}
+                    render={({ field }) => (
+                      <Select value={field.value || 'general'} onValueChange={field.onChange}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue>
+                            {field.value === 'general' && 'General / Operativa'}
+                            {field.value === 'reinvestment' && 'Reposición (Inventario)'}
+                            {field.value === 'profit' && 'Ganancias (Utilidad)'}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="general">General / Operativa</SelectItem>
+                          <SelectItem value="reinvestment">Reposición (Inventario)</SelectItem>
+                          <SelectItem value="profit">Ganancias (Utilidad)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  <InputError message={errors.role?.message} />
+                </div>
+
               </>
             )}
 

@@ -16,6 +16,7 @@
   import type { PaymentMethodFormData } from '../schemas/payment-methods.schema';
   import { getPaymentTypeIcon } from '../utils/paymentIcons';
   import type { PaymentMethod } from '@/interfaces/payment-methods.interface';
+import { PaymentMethodQrDialog } from './PaymentMethodQrDialog';
 
   interface PaymentMethodGridCardProps<TData> {
     row: Row<TData>;
@@ -32,6 +33,8 @@
     const method = row.original as unknown as PaymentMethod;
     const isSelected = row.getIsSelected();
     const IconComponent = getPaymentTypeIcon(method.type?.code);
+    const hasQr = Boolean(method.qr_code_url || method.account_number || method.id_document);
+
 
     return (
       <Card
@@ -54,6 +57,19 @@
               <span className="text-xs text-muted-foreground truncate">
                 {method.type?.name || t('common.n_a', 'N/A')}
               </span>
+              <div className="mt-1">
+              { (!hasQr || row.original.type?.code == 'cash_bs' || row.original.type?.code == 'cash_usd') ? 
+                ( <span className="text-xs text-muted-foreground">{t('common.n_a', 'N/A')}</span>) :
+                (                  
+                    <PaymentMethodQrDialog
+                      qrCodeUrl={method.qr_code_url}
+                      bankName={method.bank_name}
+                      idDocument={method.id_document}
+                      accountNumber={method.account_number}
+                    />
+                )
+              }
+              </div>
             </div>
           </div>
 

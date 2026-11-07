@@ -16,11 +16,11 @@ import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/auth-store';
 import { useLogoutMutation } from '@/pages/auth/hooks/useLogoutMutation';
 import { useThemeStore } from '@/stores/theme-store';
-import { useActiveExchangeRate } from '@/pages/settings/hooks/useActiveExchangeRate';
+import { useActiveExchangeRate } from '@/features/exchange-rates/hooks/useActiveExchangeRate';
 
 const NAV_ITEMS = [
   { href: '/admin/dashboard', labelKey: 'nav.analytics', defaultLabel: 'Dashboard', icon: BarChart3, roles: ['superadmin', 'owner'] },
-  { href: '/admin/sales/new', labelKey: 'nav.pos', defaultLabel: 'Ventas', icon: ShoppingCart, roles: ['superadmin', 'owner', 'cashier'] },
+  { href: '/admin/sales', labelKey: 'nav.pos', defaultLabel: 'Ventas', icon: ShoppingCart, roles: ['superadmin', 'owner', 'cashier'] },
   { href: '/admin/inventory', labelKey: 'nav.inventory', defaultLabel: 'Inventario', icon: Package, roles: ['superadmin', 'owner'] },
   { href: '/admin/settings', labelKey: 'nav.settings', defaultLabel: 'Configuracion', icon: Settings, roles: ['superadmin', 'owner'] },
 ];

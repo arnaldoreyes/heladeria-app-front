@@ -30,6 +30,9 @@ const DEFAULT_FORM_VALUES: PaymentMethodFormData = {
   account_number: '',
   id_document: '',
   qr_code_url: '',
+  role: '',
+  type_document: '',
+  account_type: '', 
 };
 
 export function usePaymentMethods(filters: PaymentMethodQueryParams = {}) {
@@ -191,6 +194,9 @@ export function usePaymentMethods(filters: PaymentMethodQueryParams = {}) {
         bank_name: method.bank_name || '',
         payment_type_id: method.payment_type_id || '',
         account_number: method.account_number || '',
+        role: method.role || '',
+        type_document: method.type_document || '',
+        account_type: method.account_type || '',
         id_document: method.id_document || '',
         qr_code_url: method.qr_code_url || '',
       });

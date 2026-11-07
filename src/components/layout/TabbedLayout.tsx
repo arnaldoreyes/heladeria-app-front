@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 export interface NavItem {
   path: string;
@@ -12,21 +13,34 @@ interface TabbedLayoutProps {
   title: string;
   description?: string;
   navItems: NavItem[];
+  headerActions?: ReactNode; 
 }
 
-export function TabbedLayout({ title, description, navItems }: TabbedLayoutProps) {
+export function TabbedLayout({
+  title,
+  description,
+  navItems,
+  headerActions,
+}: TabbedLayoutProps) {
   return (
     <div className="flex flex-col gap-4 p-4 md:p-6 max-w-6xl mx-auto w-full">
-      {/* Encabezado */}
-      <div>
-        <h2 className="text-xl md:text-2xl font-bold tracking-tight">{title}</h2>
-        {description && (
-          <p className="text-muted-foreground text-sm mt-1">{description}</p>
+      {/* Encabezado con soporte para botones fijos */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-xl md:text-2xl font-bold tracking-tight">{title}</h2>
+          {description && (
+            <p className="text-muted-foreground text-sm mt-1">{description}</p>
+          )}
+        </div>
+
+        {/* Acciones fijas en la cabecera */}
+        {headerActions && (
+          <div className="flex items-center gap-2 shrink-0">{headerActions}</div>
         )}
       </div>
 
       <div className="flex flex-col space-y-4">
-        
+        {/* Navegación por Tabs */}
         <div className="bg-muted/50 p-1.5 sm:bg-transparent sm:border-b sm:border-border/60 rounded-xl sm:rounded-none">
           <nav className="flex justify-around sm:justify-start sm:space-x-6" aria-label="Tabs">
             {navItems.map((item) => {
@@ -38,16 +52,14 @@ export function TabbedLayout({ title, description, navItems }: TabbedLayoutProps
                   title={item.label}
                   className={({ isActive }) =>
                     cn(
-                      
                       'flex items-center justify-center sm:justify-start gap-2.5 p-3 sm:py-3 sm:px-1 rounded-lg sm:rounded-none transition-all flex-1 sm:flex-initial',
                       isActive
-                        ? 'bg-background sm:bg-transparent sm:border-primary text-primary shadow-sm sm:shadow-none font-medium'
-                        : 'text-muted-foreground hover:text-foreground  sm:hover:bg-transparent'
+                        ? 'bg-background sm:bg-transparent sm:border-b-2 sm:border-primary text-primary shadow-sm sm:shadow-none font-medium'
+                        : 'text-muted-foreground hover:text-foreground sm:hover:bg-transparent'
                     )
                   }
                 >
                   {Icon && <Icon className="h-5 w-5 shrink-0" />}
-                  
                   <span className="hidden sm:inline text-sm">{item.label}</span>
                 </NavLink>
               );

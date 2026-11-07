@@ -11,6 +11,9 @@ export const paymentMethodSchema = z.object({
   id_document: z.string().optional().nullable(),
   email: z.string().email('Email inválido').optional().nullable().or(z.literal('')),
   is_active: z.boolean(),
+  role: z.string().optional().nullable(),
+  type_document: z.string().optional().nullable(),
+  account_type: z.string().optional().nullable(),
   qr_code_url: z
     .union([
       z.string(),

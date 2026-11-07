@@ -1,13 +1,14 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import type { User } from '@/interfaces/user.interface';
-import type { BusinessFormData } from '@/pages/settings/schemas/settings.schema';
+import type { BusinessApiResponse } from '@/interfaces/business.interface';
+
 
 export type AuthStatus = 'authenticated' | 'not-authenticated' | 'checking';
 
 interface LoginPayload {
   user: User;
-  business: BusinessFormData;
+  business: BusinessApiResponse;
   access_token: string;
   token_type: string;
   expires_at: string;
@@ -16,7 +17,7 @@ interface LoginPayload {
 interface AuthState {
   // Properties
   user: User | null;
-  business: BusinessFormData | null;
+  business: BusinessApiResponse | null;
   access_token: string | null;
   token_type: string | null;
   expires_at: string | null;

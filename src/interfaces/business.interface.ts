@@ -9,6 +9,9 @@ export interface BusinessSetting{
   print_ticket_on_sale: boolean;
   ticket_header_notes: string | null;
   ticket_footer_notes: string | null;
+  p2c_fee_percentage: number;
+  c2p_fee_percentage: number;
+  pago_movil_min_fee_bs: number;
 }
 
 export interface Business {

@@ -11,11 +11,17 @@ import type { ErrorResponse } from '@/interfaces/api.interface';
 const DEFAULT_BUSINESS_VALUES: BusinessFormData = {
   name: '',
   niche: '',
-  default_profit_percentage: 40,
-  default_reinvestment_percentage: 60,    
-  print_ticket_on_sale: false,
-  ticket_header_notes: '',
-  ticket_footer_notes: '',
+  settings: {
+    default_profit_percentage: 40,
+    default_reinvestment_percentage: 60,
+    p2c_fee_percentage: 1.5,
+    c2p_fee_percentage: 2,
+    pago_movil_min_fee_bs: 14,
+    print_ticket_on_sale: false,
+    ticket_header_notes: '',
+    ticket_footer_notes: '',
+  }
+  
 };
 
 /**
@@ -43,9 +49,9 @@ export function useBusinessSetting() {
   const { control, setValue, formState: { isSubmitting, isDirty } } = form;
 
   // 3. Suscripciones aisladas y seguras mediante useWatch
-  const printTicketOnSale = useWatch({ control, name: 'print_ticket_on_sale' });
-  const defaultReinvestment = useWatch({ control, name: 'default_reinvestment_percentage' });
-  const defaultProfit = useWatch({ control, name: 'default_profit_percentage' });
+  const printTicketOnSale = useWatch({ control, name: 'settings.print_ticket_on_sale' });
+  const defaultReinvestment = useWatch({ control, name: 'settings.default_reinvestment_percentage' });
+  const defaultProfit = useWatch({ control, name: 'settings.default_profit_percentage' });
 
   // 4. Mutación para guardar cambios
   const mutation = useMutation({
@@ -73,11 +79,11 @@ export function useBusinessSetting() {
   });
 
   const updateDistribution = (businessVal: number, personalVal: number) => {
-    setValue('default_reinvestment_percentage', businessVal, { 
+    setValue('settings.default_reinvestment_percentage', businessVal, { 
       shouldValidate: true, 
       shouldDirty: true 
     });
-    setValue('default_profit_percentage', personalVal, { 
+    setValue('settings.default_profit_percentage', personalVal, { 
       shouldValidate: true, 
       shouldDirty: true 
     });

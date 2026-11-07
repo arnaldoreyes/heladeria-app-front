@@ -21,11 +21,6 @@ export default function SettingsLayout() {
       label: t('settings.nav.exchangeRates', 'Tasas de Cambio'), 
       icon: DollarSign 
     },
-    { 
-      path: '/admin/settings/customers', 
-      label: t('settings.nav.customers', 'Clientes'), 
-      icon: Users 
-    },
   ];
 
   return (

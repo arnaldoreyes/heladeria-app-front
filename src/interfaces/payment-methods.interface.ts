@@ -21,7 +21,9 @@ export interface PaymentMethod {
   is_active: boolean;
   created_at: string;
   updated_at: string;
-  
+  role: string;
+  type_document: string;
+  account_type: string;
   type?: PaymentMethodType;
 }
 
